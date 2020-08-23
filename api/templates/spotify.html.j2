@@ -15,26 +15,13 @@
                     padding: 10px 10px 10px 0px;
                 }
 
-                .playing {
-                    font-weight: bold;
-                    color: #53b14f;
-                    text-align: center;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
-
-                .not-play {
-                    color: #ff1616;
-                }
-
                 .art {
                     float: left;
                     width: 27%;
                     margin-left: -5px;
                 }
 
-                .text {
+                .content {
                     width: 71%;
                 }
 
@@ -97,16 +84,14 @@
             <div class="main">
                 <a class="art" href="{}" target="_BLANK">
                     <center>
-                            <img src="data:image/png;base64, {{image}}" class="cover" />
+                        <img src="data:image/png;base64, {{image}}" class="cover" />
                     </center>
                 </a>
 
-                <div class="text">
+                <div class="content">
                     <div class="song">{{songName}}</div>
                     <div class="artist">{{artistName}}</div>
-                    <div id="bars">
-                        {{contentBar|safe}}
-                    </div>
+                    <div id="bars">{{contentBar|safe}}</div>
                 </div>
             </div>
 
