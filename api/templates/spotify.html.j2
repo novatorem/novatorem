@@ -43,6 +43,9 @@
                     color: #666;
                     text-align: center;
                     margin-top: 3px;
+                    white-space:nowrap;
+                    overflow:hidden;
+                    text-overflow:ellipsis;
                 }
 
                 .artist {
@@ -94,9 +97,7 @@
 
                 {{css_bar|safe}}
             </style>
-
-            {% if song_name %}
-
+            
             <div class="main">
                 <a class="art" href="{}" target="_BLANK">
                     <center>
@@ -111,10 +112,6 @@
                         {{content_bar|safe}}
                     </div>
                 </div>
-
-                {% else %}
-                    <div class="playing not-play">Nothing playing on Spotify</div>
-                {% endif %}
             </div>
 
         </div>

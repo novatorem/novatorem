@@ -6,17 +6,13 @@
 
         .main {
             display: flex;
-        }
-
-        .art {
-            float: left;
-            width: 33.33%;
+            width: "480px";
+            height: "133px";
         }
 
         .container {
-            background-color: #121212;
-            border-radius: 10px;
-            padding: 10px 10px
+            border-radius: 5px;
+            padding: 10px 10px 10px 0px;
         }
 
         .playing {
@@ -32,20 +28,31 @@
             color: #ff1616;
         }
 
-        .artist {
-            font-weight: bold;
-            font-size: 24px;
-            color: #fff;
-            text-align: left;
-            margin-top: 5px;
+        .art {
+            float: left;
+            width: 27%;
+            margin-left: -5px;
+        }
+
+        .text {
+            width: 71%;
         }
 
         .song {
+            font-size: 24px;
+            color: #666;
+            text-align: center;
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .artist {
             font-size: 20px;
             color: #b3b3b3;
-            text-align: left;
-            margin-top: 15px;
-            margin-bottom: 15px;
+            text-align: center;
+            margin-bottom: 5px;
         }
 
         .logo {
@@ -55,18 +62,20 @@
 
         .cover {
             border-radius: 5px;
-            margin-top: 9px;
+            height: 100px;
+            width: 100px;
         }
 
         #bars {
             height: 30px;
+            bottom: 23px;
             margin: -20px 0 0 0px;
             position: absolute;
             width: 40px;
         }
 
         .bar {
-            background: #53b14f;
+            background: #1DB954cc;
             bottom: 1px;
             height: 3px;
             position: absolute;
@@ -82,25 +91,25 @@
 
             100% {
                 opacity: 1;
-                height: 28px;
+                height: 15px;
             }
         }
-
-        
     </style>
+
     <div class="main">
         <a class="art" href="{}" target="_BLANK">
             <center>
-                    <img src="data:image/png;base64, {{img}}" width="200" height="200" class="cover" />
+                <img src="https://source.unsplash.com/random/500x500" class="cover" />
             </center>
         </a>
 
         <div class="text">
-            <div class="artist">Artist</div>
             <div class="song">Song</div>
-            <div id="bars"></div>
+            <div class="artist">Arist</div>
+            <div id="bars">
+                {{content_bar|safe}}
+            </div>
         </div>
     </div>
-    
 
 </div>

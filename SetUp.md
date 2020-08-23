@@ -42,3 +42,9 @@ curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Authorizat
         * `SPOTIFY_SECRET_ID`
 
 * Deploy!
+
+## ReadMe
+
+You can now use the following in your readme:
+
+```[![Spotify](https://novatorem.vercel.app/api/spotify-playing)](https://open.spotify.com/user/USER_NAME)```
