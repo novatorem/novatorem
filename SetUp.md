@@ -47,4 +47,10 @@ curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Authorizat
 
 You can now use the following in your readme:
 
-```[![Spotify](https://novatorem.vercel.app/api/spotify-playing)](https://open.spotify.com/user/USER_NAME)```
+```[![Spotify](https://USER_NAME.vercel.app/api/spotify)](https://open.spotify.com/user/USER_NAME)```
+
+## Customization
+
+If you want a distinction between the widget showing your currently playing, and your recently playing, you can hide the EQ bar when you're not actively listening.
+
+Remove the `#` in front of `contentBar` in [line 81](https://github.com/novatorem/novatorem/blob/94d00e1ca20239f76bf7d064f8831c2fd25086d3/api/spotify.py#L81) of current master, then the EQ bar will be hidden when you're in not currently playing anything.
