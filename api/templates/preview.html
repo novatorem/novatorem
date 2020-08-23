@@ -61,9 +61,11 @@
         }
 
         .cover {
+            position: absolute;
             border-radius: 5px;
             height: 100px;
             width: 100px;
+            z-index: -1;
         }
 
         #bars {
@@ -99,16 +101,14 @@
     <div class="main">
         <a class="art" href="{}" target="_BLANK">
             <center>
-                <img src="https://source.unsplash.com/random/500x500" class="cover" />
+                <img src="https://source.unsplash.com/random/500x500" class="cover"/>
             </center>
         </a>
 
         <div class="text">
             <div class="song">Song</div>
             <div class="artist">Arist</div>
-            <div id="bars">
-                {{content_bar|safe}}
-            </div>
+            <div id="bars">Bars</div>
         </div>
     </div>
 

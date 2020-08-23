@@ -43,9 +43,9 @@
                     color: #666;
                     text-align: center;
                     margin-top: 3px;
-                    white-space:nowrap;
-                    overflow:hidden;
-                    text-overflow:ellipsis;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
 
                 .artist {
@@ -53,6 +53,7 @@
                     color: #b3b3b3;
                     text-align: center;
                     margin-bottom: 5px;
+                    margin-top: 5px;
                 }
 
                 .logo {
@@ -97,19 +98,19 @@
 
                 {{css_bar|safe}}
             </style>
-            
+
             <div class="main">
                 <a class="art" href="{}" target="_BLANK">
                     <center>
-                            <img src="data:image/png;base64, {{img}}" class="cover" />
+                            <img src="data:image/png;base64, {{image}}" class="cover" />
                     </center>
                 </a>
 
                 <div class="text">
-                    <div class="song">{{song_name}}</div>
-                    <div class="artist">{{artist_name}}</div>
+                    <div class="song">{{songName}}</div>
+                    <div class="artist">{{artistName}}</div>
                     <div id="bars">
-                        {{content_bar|safe}}
+                        {{contentBar|safe}}
                     </div>
                 </div>
             </div>

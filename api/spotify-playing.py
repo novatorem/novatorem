@@ -1,30 +1,29 @@
-from flask import Flask, Response, jsonify, render_template
-from base64 import b64encode
-
-from dotenv import load_dotenv, find_dotenv
-load_dotenv(find_dotenv())
-
-import requests
-import json
 import os
+import json
 import random
+import requests
+
+from base64 import b64encode
+from dotenv import load_dotenv, find_dotenv
+from flask import Flask, Response, jsonify, render_template
+
+load_dotenv(find_dotenv())
 
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_SECRET_ID = os.getenv("SPOTIFY_SECRET_ID")
 SPOTIFY_REFRESH_TOKEN = os.getenv("SPOTIFY_REFRESH_TOKEN")
 
-# scope user-read-currently-playing/user-read-recently-played
+# Scopes:
+#   user-read-currently-playing
+#   user-read-recently-played
 SPOTIFY_URL_REFRESH_TOKEN = "https://accounts.spotify.com/api/token"
 SPOTIFY_URL_NOW_PLAYING = "https://api.spotify.com/v1/me/player/currently-playing"
 SPOTIFY_URL_RECENTLY_PLAY = "https://api.spotify.com/v1/me/player/recently-played?limit=10"
 
-
 app = Flask(__name__)
-
 
 def getAuth():
     return b64encode(f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_SECRET_ID}".encode()).decode("ascii")
-
 
 def refreshToken():
     data = {
@@ -48,11 +47,8 @@ def recentlyPlayed():
     return response.json()
 
 def nowPlaying():
-
     token = refreshToken()
-
     headers = {"Authorization": f"Bearer {token}"}
-
     response = requests.get(SPOTIFY_URL_NOW_PLAYING, headers=headers)
 
     if response.status_code == 204:
@@ -82,24 +78,24 @@ def makeSVG(data):
     barCSS = barGen(barCount)
 
     if data == {}:
-        content_bar = ""
-        recent_plays = recentlyPlayed()
-        size_recent_play = len(recent_plays["items"])
-        idx = random.randint(0, size_recent_play - 1)
-        item = recent_plays["items"][idx]["track"]
+        #contentBar = ""
+        recentlyPlayed = recentlyPlayed()
+        recentLength = len(recentlyPlayed["items"])
+        itemIndex = random.randint(0, recentLength - 1)
+        item = recentlyPlayed["items"][itemIndex]["track"]
     else:
         item = data["item"]
 
-    img = loadImageB64(item["album"]["images"][1]["url"])
+    image = loadImageB64(item["album"]["images"][1]["url"])
     artistName = item["artists"][0]["name"].replace("&", "&amp;")
     songName = item["name"].replace("&", "&amp;")
 
     dataDict = {
-        "content_bar": contentBar,
-        "css_bar": barCSS,
-        "artist_name": artistName,
-        "song_name": songName,
-        "img": img,
+        "contentBar": contentBar,
+        "barCSS": barCSS,
+        "artistName": artistName,
+        "songName": songName,
+        "image": image
     }
 
     return render_template("spotify.html.j2", **dataDict)
@@ -107,7 +103,6 @@ def makeSVG(data):
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def catch_all(path):
-
     data = nowPlaying()
     svg = makeSVG(data)
 
