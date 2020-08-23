@@ -79,10 +79,10 @@ def makeSVG(data):
 
     if data == {}:
         #contentBar = ""
-        recentlyPlayed = recentlyPlayed()
-        recentLength = len(recentlyPlayed["items"])
+        recentlyPlays = recentlyPlayed()
+        recentLength = len(recentlyPlays["items"])
         itemIndex = random.randint(0, recentLength - 1)
-        item = recentlyPlayed["items"][itemIndex]["track"]
+        item = recentlyPlays["items"][itemIndex]["track"]
     else:
         item = data["item"]
 
