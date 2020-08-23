@@ -3,7 +3,7 @@
 ## Spotify
 
 * Create a [Spotify Application](https://developer.spotify.com/dashboard/applications)
-* Put aside:
+* Take note of:
     * `Client ID`
     * `Client Secret`
 * Click on **Edit Settings**
