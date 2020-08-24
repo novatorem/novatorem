@@ -103,7 +103,7 @@ def makeSVG(data):
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def catch_all(path):
-    data = recentlyPlayed()
+    data = nowPlaying()
     svg = makeSVG(data)
 
     resp = Response(svg, mimetype="image/svg+xml")
