@@ -18,7 +18,7 @@ SPOTIFY_REFRESH_TOKEN = os.getenv("SPOTIFY_REFRESH_TOKEN")
 
 SPOTIFY_URL_REFRESH_TOKEN = "https://accounts.spotify.com/api/token"
 SPOTIFY_URL_NOW_PLAYING = "https://api.spotify.com/v1/me/player/currently-playing"
-SPOTIFY_URL_RECENTLY_PLAY = "https://api.spotify.com/v1/me/player/recently-played?limit=20"
+SPOTIFY_URL_RECENTLY_PLAY = "https://api.spotify.com/v1/me/player/recently-played?limit=10"
 
 app = Flask(__name__)
 
@@ -77,8 +77,8 @@ def makeSVG(data):
     contentBar = "".join(["<div class='bar'></div>" for i in range(barCount)])
     barCSS = barGen(barCount)
 
-    if data == {} or data["item"] == None:
-        contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
+    if data == {} or data["item"] == 'None':
+        #contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
         recentPlays = recentlyPlayed()
         recentPlaysLength = len(recentPlays["items"])
         itemIndex = random.randint(0, recentPlaysLength - 1)
@@ -113,3 +113,4 @@ def catch_all(path):
 
 if __name__ == "__main__":
     app.run(debug=True)
+    
