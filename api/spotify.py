@@ -78,7 +78,7 @@ def makeSVG(data):
     barCSS = barGen(barCount)
 
     if data == {}:
-        #contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
+        contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
         recentPlays = recentlyPlayed()
         recentPlaysLength = len(recentPlays["items"])
         itemIndex = random.randint(0, recentPlaysLength - 1)
