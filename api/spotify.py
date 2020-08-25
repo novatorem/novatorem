@@ -79,12 +79,14 @@ def makeSVG(data):
 
     if data == {}:
         #contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
+        currentStatus = "Last seen playing:"
         recentPlays = recentlyPlayed()
         recentPlaysLength = len(recentPlays["items"])
         itemIndex = random.randint(0, recentPlaysLength - 1)
         item = recentPlays["items"][itemIndex]["track"]
     else:
         item = data["item"]
+        currentStatus = "Vibing to:"
 
     image = loadImageB64(item["album"]["images"][1]["url"])
     artistName = item["artists"][0]["name"].replace("&", "&amp;")
@@ -96,6 +98,7 @@ def makeSVG(data):
         "artistName": artistName,
         "songName": songName,
         "image": image,
+        "status": currentStatus
     }
 
     return render_template("spotify.html.j2", **dataDict)

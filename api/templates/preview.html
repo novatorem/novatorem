@@ -5,16 +5,25 @@
         }
 
         .main {
+            margin-top: 40px;
             display: flex;
             width: 480px;
             height: 133px;
+        }
+
+        .currentStatus {
+            position: static;
+            float: left;
+            font-size: 24px;
+            margin-top: -5px;
+            margin-left: 10px;
         }
 
         .container {
             border-radius: 5px;
             padding: 10px 10px 10px 0px;
         }
-        
+
         .art {
             float: left;
             width: 27%;
@@ -77,6 +86,8 @@
             }
         }
     </style>
+
+    <div class="currentStatus">Currently playing</div>
 
     <div class="main">
         <a class="art" href="{}" target="_BLANK">
