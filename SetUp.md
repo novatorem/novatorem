@@ -70,3 +70,19 @@ Have a string saying either "Vibing to:" or "Last seen playing:".
 Customization requests can be submitted as an issue, like https://github.com/novatorem/novatorem/issues/2
 
 If you want to share your own customization options, open a PR if it's done or open an issue if you want it implemented by someone else.
+
+## Debugging
+
+If you have issues setting up, try following this [guide](https://youtu.be/n6d4KHSKqGk?t=615).
+
+Followed the guide and still having problems?
+Try checking out the functions tab in vercel, linked as:
+```https://vercel.com/{name}/spotify/{build}/functions``` 
+
+<details><summary>Which looks like-</summary>
+
+![image](https://user-images.githubusercontent.com/16753077/91338931-b0326680-e7a3-11ea-8178-5499e0e73250.png)
+
+</details><br>
+
+You will see a log there, and most issues can be resolved by ensuring you have the correct variables from setup.
