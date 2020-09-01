@@ -2,19 +2,15 @@
     <foreignObject width="480" height="133">
         <div xmlns="http://www.w3.org/1999/xhtml" class="container">
             <style>
-                div {
-                    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
-                }
-
                 .main {
                     /*margin-top: 40px;*/
                     display: flex;
                 }
 
                 .currentStatus {
-                    position: static;
                     float: left;
                     font-size: 24px;
+                    position: static;
                     margin-top: -5px;
                     margin-left: 10px;
                 }
@@ -25,8 +21,8 @@
                 }
 
                 .art {
-                    float: left;
                     width: 27%;
+                    float: left;
                     margin-left: -5px;
                 }
 
@@ -35,55 +31,55 @@
                 }
 
                 .song {
-                    font-size: 24px;
                     color: #666;
-                    text-align: center;
-                    margin-top: 3px;
-                    white-space:nowrap;
                     overflow:hidden;
+                    margin-top: 3px;
+                    font-size: 24px;
+                    text-align: center;
+                    white-space:nowrap;
                     text-overflow:ellipsis;
                 }
 
                 .artist {
-                    font-size: 20px;
                     color: #b3b3b3;
+                    font-size: 20px;
+                    margin-top: 4px;
                     text-align: center;
                     margin-bottom: 5px;
-                    margin-top: 4px;
                 }
 
                 .cover {
-                    border-radius: 5px;
-                    height: 100px;
                     width: 100px;
+                    height: 100px;
+                    border-radius: 5px;
                 }
 
                 #bars {
+                    width: 40px;
                     height: 30px;
                     bottom: 23px;
-                    margin: -20px 0 0 0px;
                     position: absolute;
-                    width: 40px;
+                    margin: -20px 0 0 0px;
                 }
 
                 .bar {
-                    background: #1DB954cc;
+                    width: 3px;
                     bottom: 1px;
                     height: 3px;
                     position: absolute;
-                    width: 3px;
+                    background: #1DB954cc;
                     animation: sound 0ms -800ms linear infinite alternate;
                 }
                 
                 @keyframes sound {
                     0% {
-                        opacity: .35;
                         height: 3px;
+                        opacity: .35;
                     }
 
                     100% {
-                        opacity: 1;
                         height: 15px;
+                        opacity: 0.95;
                     }
                 }
 
@@ -93,7 +89,7 @@
             <!-- <div class="currentStatus">{{status}}</div> -->
 
             <div class="main">
-                <a class="art" href="{}" target="_BLANK">
+                <a class="art" href="{}" target="_blank">
                     <center>
                         <img src="data:image/png;base64, {{image}}" class="cover" />
                     </center>
