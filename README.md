@@ -9,8 +9,8 @@
 
 <br><p align="center">Everything here is available under the [Unlicense](https://choosealicense.com/licenses/unlicense/)!<br><br>
   [![Linkedin](https://img.shields.io/badge/linked-in-369?style=flat-square&logo=linkedin&logoColor=white&color=blue)](https://www.linkedin.com/in/andrew-novac)
-  [![E-Mail](https://img.shields.io/badge/email-reveal-208?style=flat-square&logo=gmail&logoColor=white&color=blueviolet)](https://mailhide.io/e/5ck1H)
-  [![Visits](https://badges.pufler.dev/visits/novatorem/novatorem?logo=GitHub&label=github%20visits&color=00bb00&logoColor=white&style=flat-square)](https://github.com/novatorem)
+  [![E-Mail](https://img.shields.io/badge/email-reveal-208?style=flat-square&logo=gmail&logoColor=white&color=00bb00)](https://mailhide.io/e/5ck1H)
+  [![Visits](https://badges.pufler.dev/visits/novatorem/novatorem?logo=GitHub&label=github%20visits&color=333333&logoColor=white&style=flat-square)](https://github.com/novatorem)
 </p>
   </td>
   </table>
