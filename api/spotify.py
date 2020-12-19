@@ -39,7 +39,7 @@ def refreshToken():
 
     headers = {"Authorization": "Basic {}".format(getAuth())}
     response = requests.post(REFRESH_TOKEN_URL, data=data, headers=headers)
-    
+
     try:
         return response.json()["access_token"]
     except KeyError:
@@ -92,7 +92,7 @@ def makeSVG(data):
     contentBar = "".join(["<div class='bar'></div>" for i in range(barCount)])
     barCSS = barGen(barCount)
 
-    if data == {} or data["item"] == "None":
+    if data == {} or data["item"] == "None" or data["item"] is None:
         # contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
         currentStatus = "Was playing:"
         recentPlays = recentlyPlayed()
