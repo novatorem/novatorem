@@ -12,10 +12,10 @@ load_dotenv(find_dotenv())
 # Spotify scopes:
 #   user-read-currently-playing
 #   user-read-recently-played
+PLACEHOLDER_IMAGE = "PLACEHOLER_BASE64_IMAGE_HERE"
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_SECRET_ID = os.getenv("SPOTIFY_SECRET_ID")
 SPOTIFY_REFRESH_TOKEN = os.getenv("SPOTIFY_REFRESH_TOKEN")
-
 REFRESH_TOKEN_URL = "https://accounts.spotify.com/api/token"
 NOW_PLAYING_URL = "https://api.spotify.com/v1/me/player/currently-playing"
 RECENTLY_PLAYING_URL = (
@@ -102,7 +102,12 @@ def makeSVG(data):
     else:
         item = data["item"]
         currentStatus = "Vibing to:"
-    image = loadImageB64(item["album"]["images"][1]["url"])
+    
+    if item["album"]["images"] == []:
+        image = PLACEHOLDER_IMAGE
+    else : 
+        image = loadImageB64(item["album"]["images"][1]["url"])
+
     artistName = item["artists"][0]["name"].replace("&", "&amp;")
     songName = item["name"].replace("&", "&amp;")
 
