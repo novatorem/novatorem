@@ -87,6 +87,11 @@ def loadImageB64(url):
     return b64encode(resposne.content).decode("ascii")
 
 
+def codeGen(uri):
+    url = "https://scannables.scdn.co/uri/plain/png/000000/white/640/" + uri
+    return loadImageB64(url)
+
+
 def makeSVG(data):
     barCount = 84
     contentBar = "".join(["<div class='bar'></div>" for i in range(barCount)])
@@ -105,6 +110,7 @@ def makeSVG(data):
     image = loadImageB64(item["album"]["images"][1]["url"])
     artistName = item["artists"][0]["name"].replace("&", "&amp;")
     songName = item["name"].replace("&", "&amp;")
+    scanCode = codeGen(item["uri"])
 
     dataDict = {
         "contentBar": contentBar,
@@ -113,6 +119,7 @@ def makeSVG(data):
         "songName": songName,
         "image": image,
         "status": currentStatus,
+        "scanCode": scanCode,
     }
 
     return render_template("spotify.html.j2", **dataDict)
