@@ -57,6 +57,10 @@ If you want a distinction between the widget showing your currently playing, and
 
 Remove the `#` in front of `contentBar` in [line 81](https://github.com/novatorem/novatorem/blob/98ba4a8489ad86f5f73e95088e620e8859d28e71/api/spotify.py#L81) of current master, then the EQ bar will be hidden when you're in not currently playing anything.
 
+### Hide the EQ bar
+
+Remove the `#` at the start of [line 113 -114](https://github.com/novatorem/novatorem/blob/98ba4a8489ad86f5f73e95088e620e8859d28e71/api/spotify.py#L113-L114) of current master. The Spotify code of the currently playing track will be displayed in place of the EQ bar.
+
 ### Status String
 
 Have a string saying either "Vibing to:" or "Last seen playing:".

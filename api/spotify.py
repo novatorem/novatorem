@@ -109,8 +109,9 @@ def makeSVG(data):
         currentStatus = "Vibing to:"
     image = loadImageB64(item["album"]["images"][1]["url"])
     artistName = item["artists"][0]["name"].replace("&", "&amp;")
-    songName = item["name"].replace("&", "&amp;")
-    scanCode = codeGen(item["uri"])
+    songName = item["name"].replace("&", "&amp;") 
+    # scanCode = codeGen(item["uri"]) # Shows the Spotify code of the currently playing song
+    # contentBar = "" 
 
     dataDict = {
         "contentBar": contentBar,
