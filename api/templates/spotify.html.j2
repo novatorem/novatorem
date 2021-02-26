@@ -51,7 +51,8 @@
                 .cover {
                     width: 100px;
                     height: 100px;
-                    border-radius: 5px;
+                    border-radius: 50%;
+                    animation: disc 16s linear infinite;
                 }
 
                 #bars {
@@ -84,6 +85,16 @@
                     100% {
                         height: 15px;
                         opacity: 0.95;
+                    }
+                }
+
+                @keyframes disc {
+                    from {
+                        transform: rotate(0deg);
+                    }
+
+                    to {
+                        transform: rotate(360deg);
                     }
                 }
 
