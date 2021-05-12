@@ -8,7 +8,7 @@
     * `Client Secret`
 * Click on **Edit Settings**
 * In **Redirect URIs**:
-    * Add `http://localhost/callback/`
+    * Add `http://localhost/callback/` or if it says invalid_client id while bash Add 'http://localhost:8888/callback'
 
 ## Refresh Token
 
