@@ -17,6 +17,9 @@ SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_SECRET_ID = os.getenv("SPOTIFY_SECRET_ID")
 SPOTIFY_REFRESH_TOKEN = os.getenv("SPOTIFY_REFRESH_TOKEN")
 
+#########################
+# change theme light/dark
+
 TEMPLATE_THEME = "dark"
 
 REFRESH_TOKEN_URL = "https://accounts.spotify.com/api/token"
@@ -84,7 +87,7 @@ def barGen(barCount):
         left += 4
     return barCSS
 
-def template(theme):
+def getTemplate(theme):
     return{
         'dark':'spotify-dark.html.j2',
         'light':'spotify.html.js'
@@ -129,7 +132,7 @@ def makeSVG(data):
         "status": currentStatus,
     }
 
-    return render_template(template(TEMPLATE_THEME), **dataDict)
+    return render_template(getTemplate(TEMPLATE_THEME), **dataDict)
 
 
 @app.route("/", defaults={"path": ""})
