@@ -5,7 +5,7 @@ import requests
 
 from base64 import b64encode
 from dotenv import load_dotenv, find_dotenv
-from flask import Flask, Response, jsonify, render_template
+from flask import Flask, Response, jsonify, render_template, templating
 
 load_dotenv(find_dotenv())
 
@@ -16,6 +16,8 @@ PLACEHOLDER_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAA4QAAAOEBAMAAAALYOIIAAAAFVBMVEXm5ub
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_SECRET_ID = os.getenv("SPOTIFY_SECRET_ID")
 SPOTIFY_REFRESH_TOKEN = os.getenv("SPOTIFY_REFRESH_TOKEN")
+
+TEMPLATE_THEME = "dark"
 
 REFRESH_TOKEN_URL = "https://accounts.spotify.com/api/token"
 NOW_PLAYING_URL = "https://api.spotify.com/v1/me/player/currently-playing"
@@ -82,6 +84,12 @@ def barGen(barCount):
         left += 4
     return barCSS
 
+def template(theme):
+    return{
+        'dark':'spotify-dark.html.j2',
+        'light':'spotify.html.js'
+    }[theme.lower()]
+
 
 def loadImageB64(url):
     resposne = requests.get(url)
@@ -121,7 +129,7 @@ def makeSVG(data):
         "status": currentStatus,
     }
 
-    return render_template("spotify.html.j2", **dataDict)
+    return render_template(template(TEMPLATE_THEME), **dataDict)
 
 
 @app.route("/", defaults={"path": ""})
