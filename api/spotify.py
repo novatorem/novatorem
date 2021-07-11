@@ -86,10 +86,11 @@ def barGen(barCount):
 
 def getTemplate():
     try:
-        file = open("templates.json",)
-        templates = json.load(file)
+        file = open("api/templates.json","r")
+        templates = json.loads(file.read())
         return templates["templates"][templates["current-theme"]]
-    except:
+    except Exception as e:
+        print(f"Failed to load templates.")
         return FALLBACK_THEME
 
 
