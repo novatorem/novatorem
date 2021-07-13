@@ -65,6 +65,16 @@ Have a string saying either "Vibing to:" or "Last seen playing:".
 * Uncomment [**.main**'s `margin-top`](https://github.com/novatorem/novatorem/blob/5194a689253ee4c89a9d365260d6050923d93dd5/api/templates/spotify.html.j2#L10)
 * Uncomment [currentStatus](https://github.com/novatorem/novatorem/blob/5194a689253ee4c89a9d365260d6050923d93dd5/api/templates/spotify.html.j2#L93)
 
+### Theme Templates
+
+If you want to change the widget theme, you can do so by the changing the `current-theme` property in the `templates.json` file.
+
+Themes:
+* `light`
+* `dark`
+
+If you wish to customize farther, you can add your own customized `spotify.html.j2` file to the templates folder, and add the theme and file name to the `templates` dictionary in the `templates.json` file.
+
 ## Requests
 
 Customization requests can be submitted as an issue, like https://github.com/novatorem/novatorem/issues/2
