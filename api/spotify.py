@@ -84,9 +84,10 @@ def barGen(barCount):
         left += 4
     return barCSS
 
+
 def getTemplate():
     try:
-        file = open("api/templates.json","r")
+        file = open("api/templates.json", "r")
         templates = json.loads(file.read())
         return templates["templates"][templates["current-theme"]]
     except Exception as e:
@@ -114,20 +115,24 @@ def makeSVG(data):
     else:
         item = data["item"]
         currentStatus = "Vibing to:"
-    
+
     if item["album"]["images"] == []:
         image = PLACEHOLDER_IMAGE
-    else : 
+    else:
         image = loadImageB64(item["album"]["images"][1]["url"])
 
     artistName = item["artists"][0]["name"].replace("&", "&amp;")
     songName = item["name"].replace("&", "&amp;")
+    songURI = item["external_urls"]["spotify"]
+    artistURI = item["artists"][0]["external_urls"]["spotify"]
 
     dataDict = {
         "contentBar": contentBar,
         "barCSS": barCSS,
         "artistName": artistName,
         "songName": songName,
+        "songURI": songURI,
+        "artistURI": artistURI,
         "image": image,
         "status": currentStatus,
     }
