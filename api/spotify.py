@@ -5,7 +5,7 @@ import requests
 
 from base64 import b64encode
 from dotenv import load_dotenv, find_dotenv
-from flask import Flask, Response, jsonify, render_template, templating
+from flask import Flask, Response, jsonify, render_template, templating, request
 
 load_dotenv(find_dotenv())
 
@@ -96,11 +96,11 @@ def getTemplate():
 
 
 def loadImageB64(url):
-    resposne = requests.get(url)
-    return b64encode(resposne.content).decode("ascii")
+    response = requests.get(url)
+    return b64encode(response.content).decode("ascii")
 
 
-def makeSVG(data):
+def makeSVG(data, background_color, border_color):
     barCount = 84
     contentBar = "".join(["<div class='bar'></div>" for i in range(barCount)])
     barCSS = barGen(barCount)
@@ -135,6 +135,8 @@ def makeSVG(data):
         "artistURI": artistURI,
         "image": image,
         "status": currentStatus,
+        "background_color": background_color,
+        "border_color": border_color
     }
 
     return render_template(getTemplate(), **dataDict)
@@ -142,9 +144,13 @@ def makeSVG(data):
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
+@app.route('/with_parameters')
 def catch_all(path):
+    background_color = request.args.get('background_color') or "181414"
+    border_color = request.args.get('border_color') or "181414"
+
     data = nowPlaying()
-    svg = makeSVG(data)
+    svg = makeSVG(data, background_color, border_color)
 
     resp = Response(svg, mimetype="image/svg+xml")
     resp.headers["Cache-Control"] = "s-maxage=1"
@@ -153,4 +159,4 @@ def catch_all(path):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=True, port=os.getenv("PORT") or 5000)

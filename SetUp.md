@@ -1,6 +1,6 @@
 # Set Up Guide
 
-## Spotify
+## <div align="center">Spotify API</div>
 
 * Create a [Spotify Application](https://developer.spotify.com/dashboard/applications)
 * Take note of:
@@ -10,7 +10,7 @@
 * In **Redirect URIs**:
     * Add `http://localhost/callback/`
 
-## Refresh Token
+## <div align="center">Refresh Token</div>
 
 * Navigate to the following URL:
 
@@ -29,7 +29,7 @@ curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Authorizat
 
 * Save the Refresh token
 
-## Vercel
+## <div align="center">Deploy to Vercel</div>
 
 * Register on [Vercel](https://vercel.com/)
 
@@ -43,8 +43,14 @@ curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Authorizat
 
 * Deploy!
 
-## Run locally with Docker
+## <div align="center">Deploy to Heroku</div>
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/new?template=https%3A%2F%2Fgithub.com%2Fnovatorem%2Fnovatorem)
+- Create a Heroku application via the Heroku CLI or via the Heroku Dashboard. Connect the app with your GitHub repository and enable automatic builds <br>
+    `PS. automatic build means that everytime you push changes to remote, heroku will rebuild and redeploy the app.`
+    - To start the Flask server execute `heroku ps:scale web=1` once the build is completed.
+- Or click the `Deploy to Heroku` button above to automatically start the deployment process.
 
+## <div align="center">Run locally with Docker</div>
 * You need to have [Docker](https://docs.docker.com/get-docker/) installed.
 
 * Add Environment Variables:
@@ -65,21 +71,21 @@ curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Authorizat
     docker compose down
     ```
 
-## ReadMe
+## <div align="center">Readme</div>
 
 You can now use the following in your readme:
 
 ```[![Spotify](https://USER_NAME.vercel.app/api/spotify)](https://open.spotify.com/user/USER_NAME)```
 
-## Customization
+## <div align="center">Customization</div>
 
 If you want a distinction between the widget showing your currently playing, and your recently playing:
 
-### Hide the EQ bar
+## <div align="center">Hide the EQ bar</div>
 
 Remove the `#` in front of `contentBar` in [line 81](https://github.com/novatorem/novatorem/blob/98ba4a8489ad86f5f73e95088e620e8859d28e71/api/spotify.py#L81) of current master, then the EQ bar will be hidden when you're in not currently playing anything.
 
-### Status String
+## <div align="center">Status String</div>
 
 Have a string saying either "Vibing to:" or "Last seen playing:".
 
@@ -87,7 +93,7 @@ Have a string saying either "Vibing to:" or "Last seen playing:".
 * Uncomment [**.main**'s `margin-top`](https://github.com/novatorem/novatorem/blob/5194a689253ee4c89a9d365260d6050923d93dd5/api/templates/spotify.html.j2#L10)
 * Uncomment [currentStatus](https://github.com/novatorem/novatorem/blob/5194a689253ee4c89a9d365260d6050923d93dd5/api/templates/spotify.html.j2#L93)
 
-### Theme Templates
+## <div align="center">Theme Templates</div>
 
 If you want to change the widget theme, you can do so by the changing the `current-theme` property in the `templates.json` file.
 
@@ -97,14 +103,25 @@ Themes:
 
 If you wish to customize farther, you can add your own customized `spotify.html.j2` file to the templates folder, and add the theme and file name to the `templates` dictionary in the `templates.json` file.
 
-## Requests
+## <div align="center">Customization</div>
+
+You can customize the appearance of your `Card` however you wish with URL params.
+
+#### Common Options:
+
+- `background_color` - Card's background color _(hex color)_ without #
+- `border_color` - Card border color _(hex color)_ without #
+
+Use `/?background_color=8b0000&border_color=ffffff` parameter like so :
+&nbsp; <br> [![Spotify](https://spotify-readmemd.herokuapp.com/?background_color=6b0000&border_color=ffffff)]()
+
+## <div align="center">Requests</div>
 
 Customization requests can be submitted as an issue, like https://github.com/novatorem/novatorem/issues/2
 
 If you want to share your own customization options, open a PR if it's done or open an issue if you want it implemented by someone else.
 
-## Debugging
-
+## <div align="center">Debugging</div>
 If you have issues setting up, try following this [guide](https://youtu.be/n6d4KHSKqGk?t=615).
 
 Followed the guide and still having problems?
