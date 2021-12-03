@@ -43,6 +43,28 @@ curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Authorizat
 
 * Deploy!
 
+## Run locally with Docker
+
+* You need to have [Docker](https://docs.docker.com/get-docker/) installed.
+
+* Add Environment Variables:
+    * `SPOTIFY_REFRESH_TOKEN`
+    * `SPOTIFY_CLIENT_ID`
+    * `SPOTIFY_SECRET_ID`
+  
+* To run the service, open a terminal in the root folder of the repo: <br>
+    Execute:
+    ```
+    docker compose up
+    ```
+* When finished, navigate to [http://localhost:5000/](http://localhost:5000/)
+    
+* To stop the service, open a terminal in the root folder of the repo: <br>
+    Execute:
+    ```
+    docker compose down
+    ```
+
 ## ReadMe
 
 You can now use the following in your readme:
