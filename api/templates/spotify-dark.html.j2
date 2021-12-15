@@ -9,6 +9,7 @@
 
                 .currentStatus {
                     float: left;
+                    color: #f7f7f7;
                     font-size: 24px;
                     position: static;
                     margin-top: -5px;
@@ -72,10 +73,15 @@
                 .bar {
                     width: 3px;
                     bottom: 1px;
-                    height: 3px;
+                    height: 15px;
                     position: absolute;
-                    background: #1DB954cc;
-                    animation: sound 0ms -800ms linear infinite alternate;
+                    background: #5433FF;  /* fallback for old browsers */
+                    background: -webkit-linear-gradient(to right, #20BDFF, #ab66ff, #5433FF, #20BDFF);  /* Chrome 10-25, Safari 5.1-6 */
+                    background: linear-gradient(to right, #20BDFF, #ab66ff, #5433FF, #20BDFF); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+                    background-size: 200% 100%;
+                    background-position: 0% 50%;
+                    background-attachment: fixed;
+                    animation: gradient 15s ease infinite, sound 0ms -800ms ease-in infinite alternate;
                 }
                 
                 .spotify-logo {
@@ -93,23 +99,34 @@
                 div {
                     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
                 }
+
+                @keyframes gradient {
+                    0% {
+                        background-position: 0% 50%;
+                    }
+                    50% {
+                        background-position: 100% 50%;
+                    }
+                    100% {
+                        background-position: 0% 50%;
+                    }
+                }
                 
                 @keyframes sound {
                     0% {
                         height: 3px;
                         opacity: .35;
                     }
-
                     100% {
                         height: 15px;
-                        opacity: 0.95;
+                        opacity: 0.95
                     }
                 }
 
                 {{barCSS|safe}}
             </style>
 
-            <!-- <div class="currentStatus">{{status}}</div> -->
+            <!-- <div class="currentStatus" color="white">{{status}}</div> -->
 
             <div class="main">
                 <a class="art" href="{}" target="_blank">

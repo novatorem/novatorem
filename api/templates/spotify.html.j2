@@ -70,10 +70,15 @@
                 .bar {
                     width: 3px;
                     bottom: 1px;
-                    height: 3px;
+                    height: 15px;
                     position: absolute;
-                    background: #1DB954cc;
-                    animation: sound 0ms -800ms linear infinite alternate;
+                    background: #78ff8c;  /* fallback for old browsers */
+                    background: -webkit-linear-gradient(to right, #7ad8ff, #5eff69, #78ff8c, #7ad8ff);  /* Chrome 10-25, Safari 5.1-6 */
+                    background: linear-gradient(to right, #7ad8ff, #5eff69, #78ff8c, #7ad8ff); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+                    background-size: 200% 100%;
+                    background-position: 0% 50%;
+                    background-attachment: fixed;
+                    animation: gradient 15s ease infinite, sound 0ms -800ms ease-in infinite alternate;
                 }
                 
                 .spotify-logo {
@@ -91,6 +96,18 @@
                     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
                 }
                 
+                @keyframes gradient {
+                    0% {
+                        background-position: 0% 50%;
+                    }
+                    50% {
+                        background-position: 100% 50%;
+                    }
+                    100% {
+                        background-position: 0% 50%;
+                    }
+                }
+
                 @keyframes sound {
                     0% {
                         height: 3px;
