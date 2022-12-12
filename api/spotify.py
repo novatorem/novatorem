@@ -75,7 +75,7 @@ def barGen(barCount):
     barCSS = ""
     left = 1
     for i in range(1, barCount + 1):
-        anim = random.randint(750, 1000)
+        anim = random.randint(750, 1350)
         x1 = random.random()
         y1 = random.random()*2
         x2 = random.random()
