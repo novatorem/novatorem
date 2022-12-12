@@ -75,7 +75,7 @@ def barGen(barCount):
     barCSS = ""
     left = 1
     for i in range(1, barCount + 1):
-        anim = random.randint(1350, 1750)
+        anim = random.randint(650, 900)
         barCSS += (
             ".bar:nth-child({})  {{ left: {}px; animation-duration: 30s, {}ms; }}".format(
                 i, left, anim
@@ -101,7 +101,7 @@ def loadImageB64(url):
 
 
 def makeSVG(data, background_color, border_color):
-    barCount = 100 # 84
+    barCount = 84
     contentBar = "".join(["<div class='bar'></div>" for i in range(barCount)])
     barCSS = barGen(barCount)
 
