@@ -5,7 +5,7 @@ import requests
 
 from base64 import b64encode
 from dotenv import load_dotenv, find_dotenv
-from flask import Flask, Response, jsonify, render_template, templating, request
+from flask import Flask, Response, render_template, request
 
 load_dotenv(find_dotenv())
 
@@ -96,7 +96,7 @@ def getTemplate():
         templates = json.loads(file.read())
         return templates["templates"][templates["current-theme"]]
     except Exception as e:
-        print(f"Failed to load templates.")
+        print(f"Failed to load templates.\r\n```{e}```")
         return FALLBACK_THEME
 
 
