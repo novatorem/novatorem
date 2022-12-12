@@ -76,9 +76,13 @@ def barGen(barCount):
     left = 1
     for i in range(1, barCount + 1):
         anim = random.randint(750, 1000)
+        x1 = random.random()
+        y1 = random.random()*2
+        x2 = random.random()
+        y2 = random.random()*2
         barCSS += (
-            ".bar:nth-child({})  {{ left: {}px; animation-duration: 15s, {}ms; }}".format(
-                i, left, anim
+            ".bar:nth-child({})  {{ left: {}px; animation-duration: 15s, {}ms; animation-timing-function: ease, cubic-bezier({},{},{},{}); }}".format(
+                i, left, anim, x1, y1, x2, y2
             )
         )
         left += 4
