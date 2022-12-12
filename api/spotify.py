@@ -76,6 +76,7 @@ def barGen(barCount):
     left = 1
     for i in range(1, barCount + 1):
         anim = random.randint(500, 1000)
+        # below code generates random cubic-bezier values
         x1 = random.random()
         y1 = random.random()*2
         x2 = random.random()
@@ -110,15 +111,15 @@ def makeSVG(data, background_color, border_color):
     barCSS = barGen(barCount)
 
     if data == {} or data["item"] == "None" or data["item"] is None:
-        contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
-        currentStatus = "Last played:"
+        #contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
+        currentStatus = "Recently played:"
         recentPlays = recentlyPlayed()
         recentPlaysLength = len(recentPlays["items"])
-        itemIndex = random.randint(0,0)#, recentPlaysLength - 1)
+        itemIndex = random.randint(0, recentPlaysLength - 1)
         item = recentPlays["items"][itemIndex]["track"]
     else:
         item = data["item"]
-        currentStatus = "Current vibe:"
+        currentStatus = "Vibing to:"
 
     if item["album"]["images"] == []:
         image = PLACEHOLDER_IMAGE
