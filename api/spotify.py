@@ -16,6 +16,7 @@ PLACEHOLDER_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAA4QAAAOEBAMAAAALYOIIAAAAFVBMVEXm5ub
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_SECRET_ID = os.getenv("SPOTIFY_SECRET_ID")
 SPOTIFY_REFRESH_TOKEN = os.getenv("SPOTIFY_REFRESH_TOKEN")
+SPOTIFY_TOKEN = ""
 
 FALLBACK_THEME = "spotify.html.j2"
 
@@ -41,34 +42,35 @@ def refreshToken():
     }
 
     headers = {"Authorization": "Basic {}".format(getAuth())}
-    response = requests.post(REFRESH_TOKEN_URL, data=data, headers=headers)
+    response = requests.post(
+        REFRESH_TOKEN_URL, data=data, headers=headers).json()
 
     try:
-        return response.json()["access_token"]
+        return response["access_token"]
     except KeyError:
-        print(json.dumps(response.json()))
+        print(json.dumps(response))
         print("\n---\n")
-        raise KeyError(str(response.json()))
+        raise KeyError(str(response))
 
 
-def recentlyPlayed():
-    token = refreshToken()
-    headers = {"Authorization": f"Bearer {token}"}
-    response = requests.get(RECENTLY_PLAYING_URL, headers=headers)
+def get(url):
+    global SPOTIFY_TOKEN
 
-    if response.status_code == 204:
-        return {}
-    return response.json()
+    if (SPOTIFY_TOKEN == ""):
+        SPOTIFY_TOKEN = refreshToken()
 
+    response = requests.get(
+        url, headers={"Authorization": f"Bearer {SPOTIFY_TOKEN}"})
 
-def nowPlaying():
-    token = refreshToken()
-    headers = {"Authorization": f"Bearer {token}"}
-    response = requests.get(NOW_PLAYING_URL, headers=headers)
-
-    if response.status_code == 204:
-        return {}
-    return response.json()
+    if response.status_code == 401:
+        SPOTIFY_TOKEN = refreshToken()
+        response = requests.get(
+            url, headers={"Authorization": f"Bearer {SPOTIFY_TOKEN}"}).json()
+        return response
+    elif response.status_code == 204:
+        raise Exception(f"{url} returned no data.")
+    else:
+        return response.json()
 
 
 def barGen(barCount):
@@ -107,13 +109,13 @@ def loadImageB64(url):
 
 def makeSVG(data, background_color, border_color):
     barCount = 84
-    contentBar = "".join(["<div class='bar'></div>" for i in range(barCount)])
+    contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
     barCSS = barGen(barCount)
 
-    if data == {} or data["item"] == "None" or data["item"] is None:
-        #contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
-        currentStatus = "Recently played:"
-        recentPlays = recentlyPlayed()
+    if not "is_playing" in data:
+        # contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
+        currentStatus = "Was playing:"
+        recentPlays = get(RECENTLY_PLAYING_URL)
         recentPlaysLength = len(recentPlays["items"])
         itemIndex = random.randint(0, recentPlaysLength - 1)
         item = recentPlays["items"][itemIndex]["track"]
@@ -154,7 +156,11 @@ def catch_all(path):
     background_color = request.args.get('background_color') or "181414"
     border_color = request.args.get('border_color') or "181414"
 
-    data = nowPlaying()
+    try:
+        data = get(NOW_PLAYING_URL)
+    except Exception:
+        data = get(RECENTLY_PLAYING_URL)
+
     svg = makeSVG(data, background_color, border_color)
 
     resp = Response(svg, mimetype="image/svg+xml")
@@ -165,3 +171,4 @@ def catch_all(path):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=os.getenv("PORT") or 5000)
+
