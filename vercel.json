@@ -1,6 +1,7 @@
  {
   "redirects": [
     {
+      "maxDuration":"10",
       "source": "/",
       "destination": "https://github.com/novatorem/novatorem"
     }
