@@ -2,6 +2,7 @@ import os
 import json
 import random
 import requests
+import math
 
 from base64 import b64encode
 from dotenv import load_dotenv, find_dotenv
@@ -73,10 +74,10 @@ def get(url):
         return response.json()
 
 
-def barGen(barCount):
+def barGen(bar_count):
     barCSS = ""
     left = 1
-    for i in range(1, barCount + 1):
+    for i in range(1, bar_count + 1):
         anim = random.randint(500, 1000)
         # below code generates random cubic-bezier values
         x1 = random.random()
@@ -88,7 +89,7 @@ def barGen(barCount):
                 i, left, anim, x1, y1, x2, y2
             )
         )
-        left += 4
+        left += math.floor(336 / bar_count)
     return barCSS
 
 
@@ -107,10 +108,9 @@ def loadImageB64(url):
     return b64encode(response.content).decode("ascii")
 
 
-def makeSVG(data, background_color, border_color):
-    barCount = 84
-    contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
-    barCSS = barGen(barCount)
+def makeSVG(data, background_color, bar_count, border_color):
+    contentBar = "".join(["<div class='bar'></div>" for _ in range(bar_count)])
+    barCSS = barGen(bar_count)
 
     if not "is_playing" in data:
         # contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
@@ -143,6 +143,7 @@ def makeSVG(data, background_color, border_color):
         "image": image,
         "status": currentStatus,
         "background_color": background_color,
+        "bar_count": bar_count,
         "border_color": border_color
     }
 
@@ -154,6 +155,7 @@ def makeSVG(data, background_color, border_color):
 @app.route('/with_parameters')
 def catch_all(path):
     background_color = request.args.get('background_color') or "181414"
+    bar_count = request.args.get('bar_count') or 84
     border_color = request.args.get('border_color') or "181414"
 
     try:
@@ -161,7 +163,7 @@ def catch_all(path):
     except Exception:
         data = get(RECENTLY_PLAYING_URL)
 
-    svg = makeSVG(data, background_color, border_color)
+    svg = makeSVG(data, background_color, int(bar_count), border_color)
 
     resp = Response(svg, mimetype="image/svg+xml")
     resp.headers["Cache-Control"] = "s-maxage=1"
@@ -171,4 +173,3 @@ def catch_all(path):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=os.getenv("PORT") or 5000)
-

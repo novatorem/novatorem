@@ -110,10 +110,11 @@ You can customize the appearance of your `Card` however you wish with URL params
 ### Common Options:
 
 - `background_color` - Card's background color _(hex color)_ without `#`
+- `bar_count` - Card's number of bars _(int)_
 - `border_color` - Card border color _(hex color)_ without `#`
 
-Use `/?background_color=8b0000&border_color=ffffff` parameter like so:  
-&nbsp; <br> [![Spotify](https://novatorem.vercel.app/api/spotify?background_color=0d1117&border_color=ffffff)]()
+Use `/?background_color=8b0000&bar_count=42&border_color=ffffff` parameter like so:  
+&nbsp; <br> [![Spotify](https://novatorem.vercel.app/api/spotify?/?background_color=0d1117&bar_count=42&border_color=ffffff)]()
 
 ## Spotify Logo
 
