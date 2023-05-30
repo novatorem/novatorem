@@ -2,6 +2,7 @@ import os
 import json
 import random
 import requests
+import colortheif
 
 from base64 import b64encode
 from dotenv import load_dotenv, find_dotenv
@@ -91,6 +92,19 @@ def barGen(barCount):
         left += 4
     return barCSS
 
+def gradientGen(albumArtURL): 
+    colortheif = ColorThief(BytesIO(requests.get(albumArtURL).content))
+    palette = colortheif.get_palette(color_count=4)
+    gradientGen = (
+        ".bar {{ background: linear-gradient(90deg, rgb({},{},{}) 0%, rgb({},{},{}) 33%, rgb({},{},{}) 66%, rgb({},{},{}) 100%); }}".format(
+            palette[0][0], palette[0][1], palette[0][2],
+            palette[1][0], palette[1][1], palette[1][2],
+            palette[2][0], palette[2][1], palette[2][2],
+            palette[3][0], palette[3][1], palette[3][2]
+        )
+    )
+    return gradientGen
+
 
 def getTemplate():
     try:
@@ -111,6 +125,8 @@ def makeSVG(data, background_color, border_color):
     barCount = 84
     contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
     barCSS = barGen(barCount)
+    colorCSS = gradientGen(data["item"]["album"]["images"][1]["url"])
+
 
     if not "is_playing" in data:
         # contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
@@ -136,6 +152,7 @@ def makeSVG(data, background_color, border_color):
     dataDict = {
         "contentBar": contentBar,
         "barCSS": barCSS,
+        "colorCSS" : colorCSS,
         "artistName": artistName,
         "songName": songName,
         "songURI": songURI,
