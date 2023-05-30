@@ -95,14 +95,16 @@ def barGen(barCount):
 def gradientGen(albumArtURL): 
     colortheif = ColorThief(BytesIO(requests.get(albumArtURL).content))
     palette = colortheif.get_palette(color_count=4)
-    gradientGen = (
-        ".bar {{ background: linear-gradient(90deg, rgb({},{},{}) 0%, rgb({},{},{}) 33%, rgb({},{},{}) 66%, rgb({},{},{}) 100%); }}".format(
-            palette[0][0], palette[0][1], palette[0][2],
-            palette[1][0], palette[1][1], palette[1][2],
-            palette[2][0], palette[2][1], palette[2][2],
-            palette[3][0], palette[3][1], palette[3][2]
-        )
-    )
+    for i in range(1, barCount + 1):
+       gradientGen = (
+          ".bar:nth-child({})  {{ background: linear-gradient(90deg, rgb({},{},{}) 0%, rgb({},{},{}) 33%, rgb({},{},{}) 66%, rgb({},{},{}) 100%); }}".format(
+               i,
+               palette[0][0], palette[0][1], palette[0][2],
+               palette[1][0], palette[1][1], palette[1][2],
+               palette[2][0], palette[2][1], palette[2][2],
+               palette[3][0], palette[3][1], palette[3][2]
+           )
+       )
     return gradientGen
 
 
