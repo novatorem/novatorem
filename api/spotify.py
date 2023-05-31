@@ -1,8 +1,10 @@
+from io import BytesIO
 import os
 import json
 import random
 import requests
 
+from colorthief import ColorThief
 from base64 import b64encode
 from dotenv import load_dotenv, find_dotenv
 from flask import Flask, Response, render_template, request
@@ -91,6 +93,10 @@ def barGen(barCount):
         left += 4
     return barCSS
 
+def gradientGen(albumArtURL): 
+    colortheif = ColorThief(BytesIO(requests.get(albumArtURL).content))
+    palette = colortheif.get_palette(color_count=4)
+    return palette
 
 def getTemplate():
     try:
@@ -111,6 +117,7 @@ def makeSVG(data, background_color, border_color):
     barCount = 84
     contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
     barCSS = barGen(barCount)
+    palette = gradientGen(data["item"]["album"]["images"][1]["url"])
 
     if not "is_playing" in data:
         # contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
@@ -143,7 +150,8 @@ def makeSVG(data, background_color, border_color):
         "image": image,
         "status": currentStatus,
         "background_color": background_color,
-        "border_color": border_color
+        "border_color": border_color,
+        "palette": palette
     }
 
     return render_template(getTemplate(), **dataDict)
@@ -153,8 +161,8 @@ def makeSVG(data, background_color, border_color):
 @app.route("/<path:path>")
 @app.route('/with_parameters')
 def catch_all(path):
-    background_color = request.args.get('background_color') or "181414"
-    border_color = request.args.get('border_color') or "181414"
+    background_color = request.args.get('background_color') or "181414" # type: ignore
+    border_color = request.args.get('border_color') or "181414" # type: ignore
 
     try:
         data = get(NOW_PLAYING_URL)
