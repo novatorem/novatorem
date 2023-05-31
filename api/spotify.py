@@ -117,7 +117,12 @@ def makeSVG(data, background_color, border_color):
     barCount = 84
     contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
     barCSS = barGen(barCount)
-    palette = gradientGen(data["item"]["album"]["images"][1]["url"])
+    barPalette = gradientGen(data["item"]["album"]["images"][1]["url"])
+    textPalette = barPalette[0] + barPalette[1]
+    #check if the colors are too dark, and lighten them if so
+    for i in range(len(textPalette)):
+        if textPalette[i] < 50:
+            textPalette[i] += 50
 
     if not "is_playing" in data:
         # contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
@@ -151,7 +156,8 @@ def makeSVG(data, background_color, border_color):
         "status": currentStatus,
         "background_color": background_color,
         "border_color": border_color,
-        "palette": palette
+        "barPalette": barPalette,
+        "textPalette": textPalette
     }
 
     return render_template(getTemplate(), **dataDict)

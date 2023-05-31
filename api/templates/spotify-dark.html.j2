@@ -34,13 +34,21 @@
 
                 .song {
                     width: 330px;
-                    color: #f7f7f7;
+                    color: #666;
                     overflow: hidden;
                     margin-top: 3px;
                     font-size: 24px;
                     text-align: center;
                     white-space: nowrap;
                     text-overflow: ellipsis;
+                    background: linear-gradient(125deg, {{ textPalette[0] }}, {{ textPalette[1] }});
+                    -webkit-text-fill-color: transparent;
+                    -webkit-background-clip: text;
+                    text-shadow: 0px 0px 3px #fff;
+                    -webkit-box-decoration-break: clone;
+                    box-decoration-break: clone;
+                    border: 3px solid #fff;
+                    animation: gradient 15s ease infinite;
                 }
 
                 .artist {
