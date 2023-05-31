@@ -95,7 +95,7 @@ def barGen(barCount):
 
 def gradientGen(albumArtURL, color_count): 
     colortheif = ColorThief(BytesIO(requests.get(albumArtURL).content))
-    palette = colortheif.get_palette(color_count=color_count)
+    palette = colortheif.get_palette(color_count)
     return palette
 
 def getTemplate():
@@ -118,7 +118,7 @@ def makeSVG(data, background_color, border_color):
     contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
     barCSS = barGen(barCount)
     barPalette = gradientGen(data["item"]["album"]["images"][1]["url"], 4)
-    songPalette = gradientGen(data["item"]["album"]["images"][1]["url"], 3)
+    songPalette = gradientGen(data["item"]["album"]["images"][1]["url"], 2)
     
 
     if not "is_playing" in data:
