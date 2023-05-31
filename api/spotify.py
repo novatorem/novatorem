@@ -117,9 +117,6 @@ def makeSVG(data, background_color, border_color):
     barCount = 84
     contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
     barCSS = barGen(barCount)
-    barPalette = gradientGen(data["item"]["album"]["images"][1]["url"], 4)
-    songPalette = gradientGen(data["item"]["album"]["images"][1]["url"], 2)
-    
 
     if not "is_playing" in data:
         # contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
@@ -128,7 +125,10 @@ def makeSVG(data, background_color, border_color):
         recentPlaysLength = len(recentPlays["items"])
         itemIndex = random.randint(0, recentPlaysLength - 1)
         item = recentPlays["items"][itemIndex]["track"]
+        songPalette = gradientGen(recentPlays["item"]["album"]["images"][1]["url"], 2)
     else:
+        barPalette = gradientGen(data["item"]["album"]["images"][1]["url"], 4)
+        songPalette = gradientGen(data["item"]["album"]["images"][1]["url"], 2)
         item = data["item"]
         currentStatus = "Vibing to:"
 
