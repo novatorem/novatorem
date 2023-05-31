@@ -3,7 +3,6 @@ import os
 import json
 import random
 import requests
-import colortheif
 
 from colorthief import ColorThief
 from base64 import b64encode
