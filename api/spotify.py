@@ -125,6 +125,7 @@ def makeSVG(data, background_color, border_color):
         recentPlaysLength = len(recentPlays["items"])
         itemIndex = random.randint(0, recentPlaysLength - 1)
         item = recentPlays["items"][itemIndex]["track"]
+        barPalette = gradientGen(recentPlays["item"]["album"]["images"][1]["url"], 4)
         songPalette = gradientGen(recentPlays["item"]["album"]["images"][1]["url"], 2)
     else:
         barPalette = gradientGen(data["item"]["album"]["images"][1]["url"], 4)
