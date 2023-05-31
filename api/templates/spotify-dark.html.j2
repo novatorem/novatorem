@@ -50,11 +50,10 @@
                     background-position: 0% 50%;
                     -webkit-text-fill-color: transparent;
                     -webkit-background-clip: text;
-                    text-shadow: 0px 0px 3px #fff;
+                    text-shadow: 0px 0px 1px #fff;
                     -webkit-box-decoration-break: clone;
                     box-decoration-break: clone;
                     animation: gradient 15s ease infinite;
-                    animation: glow 5s ease-in-out infinite alternate;
                 }
 
                 .artist {
@@ -80,7 +79,6 @@
                     -webkit-box-decoration-break: clone;
                     box-decoration-break: clone;
                     animation: gradient 20s ease infinite;
-                    animation: glow 6s ease-in-out infinite alternate;
                 }
 
                 .cover {
@@ -151,18 +149,6 @@
                     100% {
                         height: 15px;
                         opacity: 0.95
-                    }
-                }
-
-                @keyframes glow {
-                    0% {
-                        text-shadow: 0px 0px 1px #fff;
-                    }
-                    50% {
-                        text-shadow: 0px 0px 2px #fff;
-                    }
-                    100% {
-                        text-shadow: 0px 0px 1px #fff;
                     }
                 }
 
