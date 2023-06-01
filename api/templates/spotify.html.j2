@@ -1,4 +1,4 @@
-<svg width="480" height="133" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="480" height="133+40" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <foreignObject width="480" height="133">
         <div xmlns="http://www.w3.org/1999/xhtml" class="container">
             <style>
@@ -13,6 +13,18 @@
                     position: static;
                     margin-top: -5px;
                     margin-left: 10px;
+                    background: linear-gradient(
+                                    -125deg, 
+                                    rgb({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}),
+                                    rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
+                                );                    
+                    background-size: 200% 100%;
+                    background-position: 0% 50%;
+                    -webkit-text-fill-color: transparent;
+                    -webkit-background-clip: text;
+                    -webkit-box-decoration-break: clone;
+                    box-decoration-break: clone;
+                    animation: gradient 12s ease infinite;
                 }
                 
                 .container {
