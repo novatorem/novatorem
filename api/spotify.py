@@ -94,10 +94,12 @@ def barGen(barCount):
         left += 4
     return barCSS
 
-def gradientGen(albumArtURL, color_count): 
+
+def gradientGen(albumArtURL, color_count):
     colortheif = ColorThief(BytesIO(requests.get(albumArtURL).content))
     palette = colortheif.get_palette(color_count)
     return palette
+
 
 def getTemplate():
     try:
@@ -107,7 +109,6 @@ def getTemplate():
     except Exception as e:
         print(f"Failed to load templates.\r\n```{e}```")
         return FALLBACK_THEME
-
 
 def loadImageB64(url):
     response = requests.get(url)
@@ -166,8 +167,8 @@ def makeSVG(data, background_color, border_color):
 @app.route("/<path:path>")
 @app.route('/with_parameters')
 def catch_all(path):
-    background_color = request.args.get('background_color') or "181414" # type: ignore
-    border_color = request.args.get('border_color') or "181414" # type: ignore
+    background_color = request.args.get('background_color') or "181414"
+    border_color = request.args.get('border_color') or "181414"
 
     try:
         data = get(NOW_PLAYING_URL)
@@ -184,4 +185,3 @@ def catch_all(path):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=os.getenv("PORT") or 5000)
-
