@@ -13,6 +13,18 @@
                     position: static;
                     margin-top: -5px;
                     margin-left: 10px;
+                    background: linear-gradient(
+                                    -125deg, 
+                                    rgb({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}),
+                                    rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
+                                );                    
+                    background-size: 200% 100%;
+                    background-position: 0% 50%;
+                    -webkit-text-fill-color: transparent;
+                    -webkit-background-clip: text;
+                    -webkit-box-decoration-break: clone;
+                    box-decoration-break: clone;
+                    animation: gradient 17s ease infinite;
                 }
                 
                 .container {
@@ -34,13 +46,25 @@
 
                 .song {
                     width: 330px;
-                    color: #f7f7f7;
+                    color: #666;
                     overflow: hidden;
                     margin-top: 3px;
                     font-size: 24px;
                     text-align: center;
                     white-space: nowrap;
                     text-overflow: ellipsis;
+                    background: linear-gradient(
+                                    125deg, 
+                                    rgb({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}),
+                                    rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
+                                );
+                    background-size: 200% 100%;
+                    background-position: 0% 50%;
+                    -webkit-text-fill-color: transparent;
+                    -webkit-background-clip: text;
+                    -webkit-box-decoration-break: clone;
+                    box-decoration-break: clone;
+                    animation: gradient 15s ease infinite;
                 }
 
                 .artist {
@@ -53,6 +77,18 @@
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
+                    background: linear-gradient(
+                                    -125deg, 
+                                    rgb({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}),
+                                    rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
+                                );                    
+                    background-size: 200% 100%;
+                    background-position: 0% 50%;
+                    -webkit-text-fill-color: transparent;
+                    -webkit-background-clip: text;
+                    -webkit-box-decoration-break: clone;
+                    box-decoration-break: clone;
+                    animation: gradient 12s ease infinite;
                 }
 
                 .cover {
@@ -74,11 +110,17 @@
                     position: absolute;
                     background: #5433FF;  /* fallback for old browsers */
                     background: -webkit-linear-gradient(to right, #20BDFF, #ab66ff, #5433FF, #20BDFF);  /* Chrome 10-25, Safari 5.1-6 */
-                    background: linear-gradient(to right, #20BDFF, #ab66ff, #5433FF, #20BDFF); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+                    background: linear-gradient(
+                                    90deg, 
+                                    rgb({{ barPalette[0][0] }}, {{ barPalette[0][1] }}, {{ barPalette[0][2] }}) 0%, 
+                                    rgb({{ barPalette[1][0] }}, {{ barPalette[1][1] }}, {{ barPalette[1][2] }}) 33%, 
+                                    rgb({{ barPalette[2][0] }}, {{ barPalette[2][1] }}, {{ barPalette[2][2] }}) 66%, 
+                                    rgb({{ barPalette[3][0] }}, {{ barPalette[3][1] }}, {{ barPalette[3][2] }}) 100%
+                                );
                     background-size: 200% 100%;
                     background-position: 0% 50%;
                     background-attachment: fixed;
-                    animation: gradient 15s ease infinite, sound 0ms -800ms ease-in infinite alternate;
+                    animation: gradient 15s ease infinite, pulse 0ms -800ms ease-in infinite alternate;
                 }
                 
                 .spotify-logo {
@@ -109,7 +151,7 @@
                     }
                 }
                 
-                @keyframes sound {
+                @keyframes pulse {
                     0% {
                         height: 3px;
                         opacity: .35;
