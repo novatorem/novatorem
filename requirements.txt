@@ -14,3 +14,4 @@ requests==2.24.0
 toml==0.10.2
 urllib3==1.25.11
 Werkzeug==1.0.1
+colorthief==0.2.1
