@@ -139,7 +139,7 @@ def makeSVG(data, background_color, border_color):
         "border_color": border_color,
     }
         
-    if data["currently_playing_type"] == "track":
+    if not 'currently_playing_type' in data or data["currently_playing_type"] == "track":
         if item["album"]["images"] == []:
             image = PLACEHOLDER_IMAGE
             barPalette = gradientGen(PLACEHOLDER_URL, 4)
