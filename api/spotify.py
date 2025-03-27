@@ -163,6 +163,15 @@ def makeSVG(data, background_color, border_color):
 
         return render_template(getTemplate(), **dataDict)
     elif data["currently_playing_type"] == "episode":
+        if item["images"]["images"] == []:
+            image = PLACEHOLDER_IMAGE
+            barPalette = gradientGen(PLACEHOLDER_URL, 4)
+            songPalette = gradientGen(PLACEHOLDER_URL, 2)
+        else:
+            image = loadImageB64(item["images"][1]["url"])
+            barPalette = gradientGen(item["images"][1]["url"], 4)
+            songPalette = gradientGen(item["images"][1]["url"], 2)
+
         episodeName = item["name"].replace("&", "&amp;")
         episodeURI = item["external_urls"]["spotify"]
         showName = item["show"]["name"].replace("&", "&amp;")
@@ -178,7 +187,9 @@ def makeSVG(data, background_color, border_color):
             "image": loadImageB64(item["images"][1]["url"]),
             "status": currentStatus,
             "background_color": background_color,
-            "border_color": border_color
+            "border_color": border_color,
+            "barPalette": barPalette,
+            "songPalette": songPalette
         }
 
         return render_template(getTemplate(), **dataDict)
