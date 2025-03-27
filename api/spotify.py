@@ -24,7 +24,7 @@ SPOTIFY_TOKEN = ""
 FALLBACK_THEME = "spotify.html.j2"
 
 REFRESH_TOKEN_URL = "https://accounts.spotify.com/api/token"
-NOW_PLAYING_URL = "https://api.spotify.com/v1/me/player/currently-playing"
+NOW_PLAYING_URL = "https://api.spotify.com/v1/me/player/currently-playing?additional_types=track,episode"
 RECENTLY_PLAYING_URL = (
     "https://api.spotify.com/v1/me/player/recently-played?limit=10"
 )
@@ -130,38 +130,58 @@ def makeSVG(data, background_color, border_color):
     else:
         item = data["item"]
         currentStatus = "Vibing to:"
+        
+    if data["currently_playing_type"] == "track":
+        if item["album"]["images"] == []:
+            image = PLACEHOLDER_IMAGE
+            barPalette = gradientGen(PLACEHOLDER_URL, 4)
+            songPalette = gradientGen(PLACEHOLDER_URL, 2)
+        else:
+            image = loadImageB64(item["album"]["images"][1]["url"])
+            barPalette = gradientGen(item["album"]["images"][1]["url"], 4)
+            songPalette = gradientGen(item["album"]["images"][1]["url"], 2)
 
-    if item["album"]["images"] == []:
-        image = PLACEHOLDER_IMAGE
-        barPalette = gradientGen(PLACEHOLDER_URL, 4)
-        songPalette = gradientGen(PLACEHOLDER_URL, 2)
-    else:
-        image = loadImageB64(item["album"]["images"][1]["url"])
-        barPalette = gradientGen(item["album"]["images"][1]["url"], 4)
-        songPalette = gradientGen(item["album"]["images"][1]["url"], 2)
+        artistName = item["artists"][0]["name"].replace("&", "&amp;")
+        songName = item["name"].replace("&", "&amp;")
+        songURI = item["external_urls"]["spotify"]
+        artistURI = item["artists"][0]["external_urls"]["spotify"]
 
-    artistName = item["artists"][0]["name"].replace("&", "&amp;")
-    songName = item["name"].replace("&", "&amp;")
-    songURI = item["external_urls"]["spotify"]
-    artistURI = item["artists"][0]["external_urls"]["spotify"]
+        dataDict = {
+            "contentBar": contentBar,
+            "barCSS": barCSS,
+            "artistName": artistName,
+            "songName": songName,
+            "songURI": songURI,
+            "artistURI": artistURI,
+            "image": image,
+            "status": currentStatus,
+            "background_color": background_color,
+            "border_color": border_color,
+            "barPalette": barPalette,
+            "songPalette": songPalette
+        }
 
-    dataDict = {
-        "contentBar": contentBar,
-        "barCSS": barCSS,
-        "artistName": artistName,
-        "songName": songName,
-        "songURI": songURI,
-        "artistURI": artistURI,
-        "image": image,
-        "status": currentStatus,
-        "background_color": background_color,
-        "border_color": border_color,
-        "barPalette": barPalette,
-        "songPalette": songPalette
-    }
+        return render_template(getTemplate(), **dataDict)
+    elif data["currently_playing_type"] == "episode":
+        episodeName = item["name"].replace("&", "&amp;")
+        episodeURI = item["external_urls"]["spotify"]
+        showName = item["show"]["name"].replace("&", "&amp;")
+        showURI = item["show"]["external_urls"]["spotify"]
 
-    return render_template(getTemplate(), **dataDict)
+        dataDict = {
+            "contentBar": contentBar,
+            "barCSS": barCSS,
+            "artistName": showName,
+            "artistURI": showURI,
+            "songName": episodeName,
+            "songURI": episodeURI,
+            "image": loadImageB64(item["images"][1]["url"]),
+            "status": currentStatus,
+            "background_color": background_color,
+            "border_color": border_color
+        }
 
+        return render_template(getTemplate(), **dataDict)
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
