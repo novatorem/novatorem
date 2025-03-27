@@ -24,7 +24,7 @@ SPOTIFY_TOKEN = ""
 FALLBACK_THEME = "spotify.html.j2"
 
 REFRESH_TOKEN_URL = "https://accounts.spotify.com/api/token"
-NOW_PLAYING_URL = "https://api.spotify.com/v1/me/player/currently-playing?additional_types=track,episode"
+NOW_PLAYING_URL = "https://api.spotify.com/v1/me/player/currently-playing?additional_types=episode"
 RECENTLY_PLAYING_URL = (
     "https://api.spotify.com/v1/me/player/recently-played?limit=10"
 )
@@ -131,6 +131,14 @@ def makeSVG(data, background_color, border_color):
         item = data["item"]
         currentStatus = "Vibing to:"
         
+    dataDict = {
+        "contentBar": contentBar,
+        "barCSS": barCSS,
+        "status": currentStatus,
+        "background_color": background_color,
+        "border_color": border_color,
+    }
+        
     if data["currently_playing_type"] == "track":
         if item["album"]["images"] == []:
             image = PLACEHOLDER_IMAGE
@@ -147,21 +155,15 @@ def makeSVG(data, background_color, border_color):
         artistURI = item["artists"][0]["external_urls"]["spotify"]
 
         dataDict = {
-            "contentBar": contentBar,
-            "barCSS": barCSS,
+            **dataDict,
             "artistName": artistName,
             "songName": songName,
             "songURI": songURI,
             "artistURI": artistURI,
             "image": image,
-            "status": currentStatus,
-            "background_color": background_color,
-            "border_color": border_color,
             "barPalette": barPalette,
             "songPalette": songPalette
         }
-
-        return render_template(getTemplate(), **dataDict)
     elif data["currently_playing_type"] == "episode":
         if item["images"] == []:
             image = PLACEHOLDER_IMAGE
@@ -178,21 +180,17 @@ def makeSVG(data, background_color, border_color):
         showURI = item["show"]["external_urls"]["spotify"]
 
         dataDict = {
-            "contentBar": contentBar,
-            "barCSS": barCSS,
+            **dataDict,
             "artistName": showName,
             "artistURI": showURI,
             "songName": episodeName,
             "songURI": episodeURI,
             "image": image,
-            "status": currentStatus,
-            "background_color": background_color,
-            "border_color": border_color,
             "barPalette": barPalette,
             "songPalette": songPalette
         }
 
-        return render_template(getTemplate(), **dataDict)
+    return render_template(getTemplate(), **dataDict)
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
