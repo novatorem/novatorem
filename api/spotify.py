@@ -151,8 +151,8 @@ def makeSVG(data, background_color, border_color):
 
         artistName = item["artists"][0]["name"].replace("&", "&amp;")
         songName = item["name"].replace("&", "&amp;")
-        songURI = item["external_urls"]["spotify"]
-        artistURI = item.get("artists", [{}])[0].get("external_urls", {}).get("spotify", "")
+        songURI = item.get("external_urls", {}).get("spotify", "")
+        artistURI = item["artists"][0]["external_urls"].get("spotify", "")
 
         dataDict = {
             **dataDict,
