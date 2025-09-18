@@ -232,7 +232,7 @@ class SpotifyParams(BaseModel):
 async def root():
         return RedirectResponse(url="https://github.com/novatorem/novatorem")
 
-@app.get("api/spotify", response_class=Response)
+@app.get("/api/spotify", response_class=Response)
 async def catch_all(
     params: SpotifyParams = Query(...)
 ):
