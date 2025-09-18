@@ -8,6 +8,7 @@ from colorthief import ColorThief
 from base64 import b64encode
 from dotenv import load_dotenv, find_dotenv
 from fastapi import FastAPI, Response, Request, Query
+from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from typing import Optional
@@ -33,6 +34,7 @@ RECENTLY_PLAYING_URL = (
 )
 
 app = FastAPI(
+    root_path="/api",
     redoc_url="/redocs",  # None
     docs_url="/docs"  # None
 )
@@ -46,7 +48,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-templates = Jinja2Templates(directory="templates")
+# Use absolute path for templates to work in serverless environment
+base_dir = os.path.dirname(os.path.abspath(__file__))
+templates_dir = os.path.join(base_dir, "templates")
+templates = Jinja2Templates(directory=templates_dir)
 
 
 def getAuth():
@@ -123,16 +128,12 @@ async def gradientGen(albumArtURL, color_count):
         return palette
 
 
-def getTemplate():
-    try:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        templates_path = os.path.join(base_dir, "templates.json")
-        with open(templates_path, "r") as file:
-            templates = json.loads(file.read())
-        return templates["templates"][templates["current-theme"]]
-    except Exception as e:
-        print(f"Failed to load templates.\r\n```{e}```")
-        return FALLBACK_THEME
+def getTemplate(theme="dark"):
+    # Return light theme if theme is 'light', otherwise default to dark
+    if theme.lower() == "light":
+        return "spotify.html.j2"
+    else:
+        return "spotify-dark.html.j2"
 
 async def loadImageB64(url):
     async with httpx.AsyncClient() as client:
@@ -140,7 +141,7 @@ async def loadImageB64(url):
         return b64encode(response.content).decode("ascii")
 
 
-async def makeSVG(data, background_color, border_color):
+async def makeSVG(data, background_color, border_color, theme="dark"):
     barCount = 84
     contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
     barCSS = barGen(barCount)
@@ -220,15 +221,18 @@ async def makeSVG(data, background_color, border_color):
         "songPalette": songPalette
     }
 
-    return templates.get_template(getTemplate()).render(**dataDict)
+    return templates.get_template(getTemplate(theme)).render(**dataDict)
 
+class SpotifyParams(BaseModel):
+    background_color: Optional[str] = Field(default="181414")
+    border_color: Optional[str] = Field(default="181414")
+    theme: Optional[str] = Field(default="dark", enum=["dark", "light"])
 
 @app.get("/", response_class=Response)
+@app.get("/spotify", response_class=Response)
 @app.get("/{path:path}", response_class=Response)
 async def catch_all(
-    path: str = "",
-    background_color: Optional[str] = Query("181414"),
-    border_color: Optional[str] = Query("181414")
+    params: SpotifyParams = Query(...)
 ):
     # Query parameters are now handled by FastAPI function parameters
 
@@ -237,7 +241,7 @@ async def catch_all(
     except Exception:
         data = await get(RECENTLY_PLAYING_URL)
 
-    svg = await makeSVG(data, background_color, border_color)
+    svg = await makeSVG(data, params.background_color, params.border_color, params.theme)
 
     resp = Response(svg, media_type="image/svg+xml")
     resp.headers["Cache-Control"] = "s-maxage=1"
