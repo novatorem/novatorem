@@ -8,12 +8,8 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "/(.*)",
       "dest": "api/spotify.py"
-    },
-    {
-      "src": "/",
-      "dest": "https://github.com/novatorem/novatorem"
     }
   ]
 }
