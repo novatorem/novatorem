@@ -1,1 +1,1 @@
-web: gunicorn --workers=1 api.spotify:app
+web: uvicorn api.spotify:app --host=0.0.0.0 --port=8000

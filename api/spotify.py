@@ -2,12 +2,17 @@ from io import BytesIO
 import os
 import json
 import random
-import requests
+import httpx
 
 from colorthief import ColorThief
 from base64 import b64encode
 from dotenv import load_dotenv, find_dotenv
-from flask import Flask, Response, render_template, request
+from fastapi import FastAPI, Response, Request, Query
+from fastapi.responses import RedirectResponse
+from pydantic import BaseModel, Field
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
+from typing import Optional
 
 load_dotenv(find_dotenv())
 
@@ -29,7 +34,24 @@ RECENTLY_PLAYING_URL = (
     "https://api.spotify.com/v1/me/player/recently-played?limit=10"
 )
 
-app = Flask(__name__)
+app = FastAPI(
+    redoc_url="/redocs",  # None
+    docs_url="/docs"  # None
+)
+
+# Allow CORS for all origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Use absolute path for templates to work in serverless environment
+base_dir = os.path.dirname(os.path.abspath(__file__))
+templates_dir = os.path.join(base_dir, "templates")
+templates = Jinja2Templates(directory=templates_dir)
 
 
 def getAuth():
@@ -38,42 +60,45 @@ def getAuth():
     )
 
 
-def refreshToken():
+async def refreshToken():
     data = {
         "grant_type": "refresh_token",
         "refresh_token": SPOTIFY_REFRESH_TOKEN,
     }
 
     headers = {"Authorization": "Basic {}".format(getAuth())}
-    response = requests.post(
-        REFRESH_TOKEN_URL, data=data, headers=headers).json()
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            REFRESH_TOKEN_URL, data=data, headers=headers)
+        response_json = response.json()
 
     try:
-        return response["access_token"]
+        return response_json["access_token"]
     except KeyError:
-        print(json.dumps(response))
+        print(json.dumps(response_json))
         print("\n---\n")
-        raise KeyError(str(response))
+        raise KeyError(str(response_json))
 
 
-def get(url):
+async def get(url):
     global SPOTIFY_TOKEN
 
     if (SPOTIFY_TOKEN == ""):
-        SPOTIFY_TOKEN = refreshToken()
+        SPOTIFY_TOKEN = await refreshToken()
 
-    response = requests.get(
-        url, headers={"Authorization": f"Bearer {SPOTIFY_TOKEN}"})
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            url, headers={"Authorization": f"Bearer {SPOTIFY_TOKEN}"})
 
-    if response.status_code == 401:
-        SPOTIFY_TOKEN = refreshToken()
-        response = requests.get(
-            url, headers={"Authorization": f"Bearer {SPOTIFY_TOKEN}"}).json()
-        return response
-    elif response.status_code == 204:
-        raise Exception(f"{url} returned no data.")
-    else:
-        return response.json()
+        if response.status_code == 401:
+            SPOTIFY_TOKEN = await refreshToken()
+            response = await client.get(
+                url, headers={"Authorization": f"Bearer {SPOTIFY_TOKEN}"})
+            return response.json()
+        elif response.status_code == 204:
+            raise Exception(f"{url} returned no data.")
+        else:
+            return response.json()
 
 
 def barGen(barCount):
@@ -95,50 +120,86 @@ def barGen(barCount):
     return barCSS
 
 
-def gradientGen(albumArtURL, color_count):
-    colortheif = ColorThief(BytesIO(requests.get(albumArtURL).content))
-    palette = colortheif.get_palette(color_count)
-    return palette
+async def gradientGen(albumArtURL, color_count):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(albumArtURL)
+        colortheif = ColorThief(BytesIO(response.content))
+        palette = colortheif.get_palette(color_count)
+        return palette
 
 
-def getTemplate():
-    try:
-        file = open("api/templates.json", "r")
-        templates = json.loads(file.read())
-        return templates["templates"][templates["current-theme"]]
-    except Exception as e:
-        print(f"Failed to load templates.\r\n```{e}```")
-        return FALLBACK_THEME
+def getTemplate(theme="dark"):
+    # Return light theme if theme is 'light', otherwise default to dark
+    if theme.lower() == "light":
+        return "spotify.html.j2"
+    else:
+        return "spotify-dark.html.j2"
 
-def loadImageB64(url):
-    response = requests.get(url)
-    return b64encode(response.content).decode("ascii")
+async def loadImageB64(url):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        return b64encode(response.content).decode("ascii")
 
 
-def makeSVG(data, background_color, border_color):
+async def makeSVG(data, background_color, border_color, theme="dark"):
     barCount = 84
     contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
     barCSS = barGen(barCount)
 
     if not "is_playing" in data:
-        #contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
         currentStatus = "Recently played:"
-        recentPlays = get(RECENTLY_PLAYING_URL)
-        recentPlaysLength = len(recentPlays["items"])
-        itemIndex = random.randint(0, recentPlaysLength - 1)
-        item = recentPlays["items"][itemIndex]["track"]
+        try:
+            recentPlays = await get(RECENTLY_PLAYING_URL)
+            items = recentPlays.get("items", [])
+            if not items:
+                # No recently played tracks, use placeholder
+                item = {
+                    "album": {"images": []},
+                    "artists": [{"name": "Unknown Artist", "external_urls": {"spotify": "#"}}],
+                    "name": "No recent track",
+                    "external_urls": {"spotify": "#"}
+                }
+            else:
+                # Defensive: ensure each item has 'track'
+                valid_tracks = [i["track"] for i in items if "track" in i]
+                if not valid_tracks:
+                    item = {
+                        "album": {"images": []},
+                        "artists": [{"name": "Unknown Artist", "external_urls": {"spotify": "#"}}],
+                        "name": "No recent track",
+                        "external_urls": {"spotify": "#"}
+                    }
+                else:
+                    itemIndex = random.randint(0, len(valid_tracks) - 1)
+                    item = valid_tracks[itemIndex]
+        except Exception:
+            # On any error, use placeholder
+            item = {
+                "album": {"images": []},
+                "artists": [{"name": "Unknown Artist", "external_urls": {"spotify": "#"}}],
+                "name": "No recent track",
+                "external_urls": {"spotify": "#"}
+            }
     else:
-        item = data["item"]
+        item = data.get("item")
         currentStatus = "Vibing to:"
+        if not item:
+            # Defensive: fallback to placeholder if 'item' missing
+            item = {
+                "album": {"images": []},
+                "artists": [{"name": "Unknown Artist", "external_urls": {"spotify": "#"}}],
+                "name": "No track info",
+                "external_urls": {"spotify": "#"}
+            }
 
     if item["album"]["images"] == []:
         image = PLACEHOLDER_IMAGE
-        barPalette = gradientGen(PLACEHOLDER_URL, 4)
-        songPalette = gradientGen(PLACEHOLDER_URL, 2)
+        barPalette = await gradientGen(PLACEHOLDER_URL, 4)
+        songPalette = await gradientGen(PLACEHOLDER_URL, 2)
     else:
-        image = loadImageB64(item["album"]["images"][1]["url"])
-        barPalette = gradientGen(item["album"]["images"][1]["url"], 4)
-        songPalette = gradientGen(item["album"]["images"][1]["url"], 2)
+        image = await loadImageB64(item["album"]["images"][1]["url"])
+        barPalette = await gradientGen(item["album"]["images"][1]["url"], 4)
+        songPalette = await gradientGen(item["album"]["images"][1]["url"], 2)
 
     artistName = item["artists"][0]["name"].replace("&", "&amp;")
     songName = item["name"].replace("&", "&amp;")
@@ -160,28 +221,53 @@ def makeSVG(data, background_color, border_color):
         "songPalette": songPalette
     }
 
-    return render_template(getTemplate(), **dataDict)
+    return templates.get_template(getTemplate(theme)).render(**dataDict)
+
+class SpotifyParams(BaseModel):
+    background_color: Optional[str] = Field(
+        default="181414",
+        description="Background color for the SVG card in hex format (with or without #). Default is Spotify dark."
+    )
+    border_color: Optional[str] = Field(
+        default="181414",
+        description="Border color for the SVG card in hex format (with or without #). Default is Spotify dark."
+    )
+    theme: Optional[str] = Field(
+        default="dark",
+        description="Theme for the SVG card. Choose 'dark' or 'light'. Default is 'dark'.",
+        enum=["dark", "light"]
+    )
 
 
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
-@app.route('/with_parameters')
-def catch_all(path):
-    background_color = request.args.get('background_color') or "181414"
-    border_color = request.args.get('border_color') or "181414"
+@app.get("/api/spotify", response_class=Response)
+@app.get("/spotify", response_class=Response)
+async def catch_all(
+    params: SpotifyParams = Query(...)
+):
+    def strip_hash(color: Optional[str]) -> Optional[str]:
+        if color and color.startswith("#"):
+            return color[1:]
+        return color
 
     try:
-        data = get(NOW_PLAYING_URL)
+        data = await get(NOW_PLAYING_URL)
     except Exception:
-        data = get(RECENTLY_PLAYING_URL)
+        data = await get(RECENTLY_PLAYING_URL)
 
-    svg = makeSVG(data, background_color, border_color)
+    background_color = strip_hash(params.background_color)
+    border_color = strip_hash(params.border_color)
 
-    resp = Response(svg, mimetype="image/svg+xml")
+    svg = await makeSVG(data, background_color, border_color, params.theme)
+
+    resp = Response(svg, media_type="image/svg+xml")
     resp.headers["Cache-Control"] = "s-maxage=1"
 
     return resp
 
+@app.get("/{path:path}", response_class=Response)
+async def root():
+        return RedirectResponse(url="https://github.com/novatorem/novatorem")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=os.getenv("PORT") or 5000)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 5000)))

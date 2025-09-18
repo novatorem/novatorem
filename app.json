@@ -2,7 +2,7 @@
     "name": "novatorem",
     "description": "Realtime profile Readme displaying currently playing song on Spotify using the Spotify API.",
     "scripts": {
-        "postdeploy": "gunicorn --workers=1 api.spotify:app"
+        "postdeploy": "uvicorn api.spotify:app --host=0.0.0.0 --port=8000"
     },
     "env": {
         "SPOTIFY_CLIENT_ID": {

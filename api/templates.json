@@ -1,7 +1,0 @@
-{
-    "current-theme": "dark",
-    "templates": {
-        "light": "spotify.html.j2",
-        "dark": "spotify-dark.html.j2"
-    }
-}

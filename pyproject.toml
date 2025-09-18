@@ -1,0 +1,14 @@
+[project]
+name = "novatorem"
+version = "1.0.0"
+description = "spotify"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "colorthief>=0.2.1",
+    "fastapi>=0.116.2",
+    "httpx>=0.28.1",
+    "jinja2>=3.1.6",
+    "python-multipart>=0.0.20",
+    "uvicorn[standard]>=0.35.0",
+]
