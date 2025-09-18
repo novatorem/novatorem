@@ -8,6 +8,7 @@ from colorthief import ColorThief
 from base64 import b64encode
 from dotenv import load_dotenv, find_dotenv
 from fastapi import FastAPI, Response, Request, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from typing import Optional
 
@@ -31,7 +32,20 @@ RECENTLY_PLAYING_URL = (
     "https://api.spotify.com/v1/me/player/recently-played?limit=10"
 )
 
-app = FastAPI()
+app = FastAPI(
+    redoc_url="/redocs",  # None
+    docs_url="/docs"  # None
+)
+
+# Allow CORS for all origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 templates = Jinja2Templates(directory="templates")
 
 
