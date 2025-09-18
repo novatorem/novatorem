@@ -224,21 +224,40 @@ async def makeSVG(data, background_color, border_color, theme="dark"):
     return templates.get_template(getTemplate(theme)).render(**dataDict)
 
 class SpotifyParams(BaseModel):
-    background_color: Optional[str] = Field(default="181414")
-    border_color: Optional[str] = Field(default="181414")
-    theme: Optional[str] = Field(default="dark", enum=["dark", "light"])
+    background_color: Optional[str] = Field(
+        default="181414",
+        description="Background color for the SVG card in hex format (with or without #). Default is Spotify dark."
+    )
+    border_color: Optional[str] = Field(
+        default="181414",
+        description="Border color for the SVG card in hex format (with or without #). Default is Spotify dark."
+    )
+    theme: Optional[str] = Field(
+        default="dark",
+        description="Theme for the SVG card. Choose 'dark' or 'light'. Default is 'dark'.",
+        enum=["dark", "light"]
+    )
+
 
 @app.get("/api/spotify", response_class=Response)
 @app.get("/spotify", response_class=Response)
 async def catch_all(
     params: SpotifyParams = Query(...)
 ):
+    def strip_hash(color: Optional[str]) -> Optional[str]:
+        if color and color.startswith("#"):
+            return color[1:]
+        return color
+
     try:
         data = await get(NOW_PLAYING_URL)
     except Exception:
         data = await get(RECENTLY_PLAYING_URL)
 
-    svg = await makeSVG(data, params.background_color, params.border_color, params.theme)
+    background_color = strip_hash(params.background_color)
+    border_color = strip_hash(params.border_color)
+
+    svg = await makeSVG(data, background_color, border_color, params.theme)
 
     resp = Response(svg, media_type="image/svg+xml")
     resp.headers["Cache-Control"] = "s-maxage=1"
