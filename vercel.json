@@ -8,6 +8,10 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "api/spotify.py"
+    },
+    {
       "src": "/(.*)",
       "dest": "api/spotify.py"
     }
