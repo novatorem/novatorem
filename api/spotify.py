@@ -132,24 +132,50 @@ async def makeSVG(data, background_color, border_color):
     barCSS = barGen(barCount)
 
     if not "is_playing" in data:
-        #contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
         currentStatus = "Recently played:"
-        recentPlays = await get(RECENTLY_PLAYING_URL)
-        recentPlaysLength = len(recentPlays["items"])
-        if recentPlaysLength == 0:
-            # No recently played tracks, use placeholder
+        try:
+            recentPlays = await get(RECENTLY_PLAYING_URL)
+            items = recentPlays.get("items", [])
+            if not items:
+                # No recently played tracks, use placeholder
+                item = {
+                    "album": {"images": []},
+                    "artists": [{"name": "Unknown Artist", "external_urls": {"spotify": "#"}}],
+                    "name": "No recent track",
+                    "external_urls": {"spotify": "#"}
+                }
+            else:
+                # Defensive: ensure each item has 'track'
+                valid_tracks = [i["track"] for i in items if "track" in i]
+                if not valid_tracks:
+                    item = {
+                        "album": {"images": []},
+                        "artists": [{"name": "Unknown Artist", "external_urls": {"spotify": "#"}}],
+                        "name": "No recent track",
+                        "external_urls": {"spotify": "#"}
+                    }
+                else:
+                    itemIndex = random.randint(0, len(valid_tracks) - 1)
+                    item = valid_tracks[itemIndex]
+        except Exception:
+            # On any error, use placeholder
             item = {
                 "album": {"images": []},
                 "artists": [{"name": "Unknown Artist", "external_urls": {"spotify": "#"}}],
                 "name": "No recent track",
                 "external_urls": {"spotify": "#"}
             }
-        else:
-            itemIndex = random.randint(0, recentPlaysLength - 1)
-            item = recentPlays["items"][itemIndex]["track"]
     else:
-        item = data["item"]
+        item = data.get("item")
         currentStatus = "Vibing to:"
+        if not item:
+            # Defensive: fallback to placeholder if 'item' missing
+            item = {
+                "album": {"images": []},
+                "artists": [{"name": "Unknown Artist", "external_urls": {"spotify": "#"}}],
+                "name": "No track info",
+                "external_urls": {"spotify": "#"}
+            }
 
     if item["album"]["images"] == []:
         image = PLACEHOLDER_IMAGE
