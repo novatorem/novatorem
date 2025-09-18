@@ -1,13 +1,19 @@
 {
-	"version": 2,
-	"builds": [{ "src": "api/spotify.py", "use": "@vercel/python" }],
-	"routes": [
-		{ "src": "/api/(.*)", "dest": "api/spotify.py" }
-	],
-  "redirects": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/",
-      "destination": "https://github.com/novatorem/novatorem"
+      "src": "api/spotify.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/spotify.py"
+    },
+    {
+      "src": "/",
+      "dest": "https://github.com/novatorem/novatorem"
     }
   ]
 }
