@@ -111,8 +111,10 @@ async def gradientGen(albumArtURL, color_count):
 
 def getTemplate():
     try:
-        file = open("templates.json", "r")
-        templates = json.loads(file.read())
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        templates_path = os.path.join(base_dir, "templates.json")
+        with open(templates_path, "r") as file:
+            templates = json.loads(file.read())
         return templates["templates"][templates["current-theme"]]
     except Exception as e:
         print(f"Failed to load templates.\r\n```{e}```")
