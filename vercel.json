@@ -1,4 +1,9 @@
- {
+{
+	"version": 2,
+	"builds": [{ "src": "api/spotify.py", "use": "@vercel/python" }],
+	"routes": [
+		{ "src": "/api/(.*)", "dest": "api/spotify.py" }
+	],
   "redirects": [
     {
       "source": "/",
