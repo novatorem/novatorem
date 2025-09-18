@@ -35,8 +35,8 @@ RECENTLY_PLAYING_URL = (
 )
 
 app = FastAPI(
-    redoc_url="/api/redocs",  # None
-    docs_url="/api/docs"  # None
+    redoc_url="/redocs",  # None
+    docs_url="/docs"  # None
 )
 
 # Allow CORS for all origins
@@ -228,11 +228,8 @@ class SpotifyParams(BaseModel):
     border_color: Optional[str] = Field(default="181414")
     theme: Optional[str] = Field(default="dark", enum=["dark", "light"])
 
-@app.get("/{path:path}", response_class=Response)
-async def root():
-        return RedirectResponse(url="https://github.com/novatorem/novatorem")
-
 @app.get("/api/spotify", response_class=Response)
+@app.get("/spotify", response_class=Response)
 async def catch_all(
     params: SpotifyParams = Query(...)
 ):
@@ -248,6 +245,9 @@ async def catch_all(
 
     return resp
 
+@app.get("/{path:path}", response_class=Response)
+async def root():
+        return RedirectResponse(url="https://github.com/novatorem/novatorem")
 
 if __name__ == "__main__":
     import uvicorn
