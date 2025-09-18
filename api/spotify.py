@@ -35,8 +35,8 @@ RECENTLY_PLAYING_URL = (
 
 app = FastAPI(
     root_path="/api",
-    redoc_url="/redocs",  # None
-    docs_url="/docs"  # None
+    redoc_url="/spotify/redocs",  # None
+    docs_url="/spotify/docs"  # None
 )
 
 # Allow CORS for all origins
