@@ -26,8 +26,9 @@ FALLBACK_THEME = "spotify.html.j2"
 
 REFRESH_TOKEN_URL = "https://accounts.spotify.com/api/token"
 NOW_PLAYING_URL = "https://api.spotify.com/v1/me/player/currently-playing"
-RECENTLY_PLAYING_URL = "https://api.spotify.com/v1/me/player/recently-played"
-
+RECENTLY_PLAYING_URL = (
+    "https://api.spotify.com/v1/me/player/recently-played"
+)
 
 app = Flask(__name__)
 
@@ -137,7 +138,6 @@ def makeSVG(data, background_color, border_color):
     if data and "item" in data:
         item = data["item"]
         currentStatus = "Vibing to:"
-        # Set contentBar to show bars if a song is playing
         contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
     else:
         # If not playing, get a random recently played track
@@ -147,22 +147,13 @@ def makeSVG(data, background_color, border_color):
             recent_plays = get(RECENTLY_PLAYING_URL + "?limit=50")
             if recent_plays and "items" in recent_plays and recent_plays["items"]:
                 
-                # Create a list of unique tracks to choose from
-                unique_tracks = {}
-                for played_item in recent_plays["items"]:
-                    track = played_item["track"]
-                    # Use the track ID to ensure uniqueness
-                    if track["id"] not in unique_tracks:
-                        unique_tracks[track["id"]] = track
+                # Get a list of all tracks from the response
+                all_tracks = [played_item["track"] for played_item in recent_plays["items"]]
                 
-                # Convert the unique tracks to a list and select a random one
-                if unique_tracks:
-                    random_track = random.choice(list(unique_tracks.values()))
-                    item = random_track
-                    contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
-                else:
-                    currentStatus = "No music played recently"
-                    contentBar = ""
+                # Select a random track from the list
+                random_track = random.choice(all_tracks)
+                item = random_track
+                contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
             else:
                 # No recent plays available
                 currentStatus = "No music playing"
@@ -215,7 +206,6 @@ def makeSVG(data, background_color, border_color):
 
     return render_template(getTemplate(), **dataDict)
 
-
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 @app.route('/with_parameters')
@@ -225,7 +215,6 @@ def catch_all(path):
 
     data = None
     try:
-        # First, try to get the currently playing song
         data = get(NOW_PLAYING_URL)
     except Exception as e:
         print(f"Error fetching currently playing data: {e}")
@@ -239,3 +228,4 @@ def catch_all(path):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=os.getenv("PORT") or 5000)
+
