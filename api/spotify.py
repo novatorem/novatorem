@@ -129,7 +129,7 @@ def loadImageB64(url):
 
 def makeSVG(data, background_color, border_color):
     barCount = 84
-    contentBar = ""
+    # contentBar = ""
     barCSS = barGen(barCount)
 
     # Determine what to display based on the 'data' passed
@@ -153,7 +153,7 @@ def makeSVG(data, background_color, border_color):
             songName = "Check back later"
             songURI = "#"
             artistURI = "#"
-            contentBar = "" # Hide the EQ bars
+           # contentBar = "" # Hide the EQ bars
             dataDict = {
                 "contentBar": contentBar,
                 "barCSS": barCSS,
@@ -199,7 +199,7 @@ def makeSVG(data, background_color, border_color):
         songName = "Check back later"
         songURI = "#"
         artistURI = "#"
-        contentBar = ""
+      #  contentBar = ""
 
     dataDict = {
         "contentBar": contentBar,
