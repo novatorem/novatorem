@@ -5,7 +5,7 @@
    </div> 
    
 <div align="left">
- Slightly modified from the original <br> "spotify now playing" by "novatorem (OG🖤)".
+ Slightly modified of the Original <br> <a href="https://github.com/novatorem/novatorem">Spotify now playing - Novatorem (OG🖤)</a>
     
 </div>
 
