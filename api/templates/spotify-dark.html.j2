@@ -1,53 +1,70 @@
-<svg viewBox="0 0 480 133" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-  <foreignObject width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+<svg viewBox="0 0 480 133" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <foreignObject width="480" height="133" preserveAspectRatio="xMidYMid meet">
     <div xmlns="http://www.w3.org/1999/xhtml" class="container">
       <style>
+
+        /* container uses a dark glassmorphism layer plus a subtle overlay from the song palette */
+        .container {
+          border-radius: 5px;
+          padding: 10px 10px 10px 0px;
+          box-sizing: border-box;
+          width: 100%;
+          height: 100%;
+          background-color: #{{background_color}};
+          border: 1px solid #{{border_color}};
+          backdrop-filter: blur(10px) saturate(140%);
+          -webkit-backdrop-filter: blur(10px) saturate(140%);
+          background-image:
+            linear-gradient(
+              135deg,
+              rgba({{songPalette[0][0]}}, {{songPalette[0][1]}}, {{songPalette[0][2]}}, 0.10),
+              rgba({{songPalette[1][0]}}, {{songPalette[1][1]}}, {{songPalette[1][2]}}, 0.10)
+            ),
+            linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45));
+        }
+
+        /* main layout keeps album on the left, text stack on the right */
         .main {
           display: flex;
           flex-direction: row;
           align-items: center;
           gap: 10px;
-        }
-
-        /* ✅ Glassmorphism container */
-        .container {
-          border-radius: 15px;
-          padding: 12px;
-          background: rgba(20, 20, 20, 0.55);
-          backdrop-filter: blur(12px) saturate(160%);
-          -webkit-backdrop-filter: blur(12px) saturate(160%);
-          border: 1px solid rgba(255, 255, 255, 0.1);
           width: 100%;
           height: 100%;
-          box-sizing: border-box;
         }
 
         .art {
-          flex-shrink: 0;
+          flex: 0 0 100px; /* fixed album width similar to original */
+          display: block;
         }
 
         .cover {
-          width: 90px;
-          height: 90px;
-          border-radius: 10px;
+          width: 100px;
+          height: 100px;
+          border-radius: 5px;
+          object-fit: cover;
+          display: block;
         }
 
         .content {
-          flex: 1;
+          flex: 1 1 auto;
           display: flex;
           flex-direction: column;
-          align-items: center;
           justify-content: center;
-          text-align: center;
-          overflow: hidden;
+          align-items: flex-start; /* song and artist stacked vertically */
+          min-width: 0; /* allow ellipsis on children */
+          padding-right: 8px;
         }
 
+        /* gradient text for song and artist preserved */
         .song {
-          font-size: 20px;
+          color: #666;
+          margin-top: 3px;
+          font-size: 24px;
           font-weight: 600;
+          overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
-          overflow: hidden;
           max-width: 100%;
           background: linear-gradient(
             125deg,
@@ -58,15 +75,19 @@
           background-position: 0% 50%;
           -webkit-text-fill-color: transparent;
           -webkit-background-clip: text;
+          -webkit-box-decoration-break: clone;
+          box-decoration-break: clone;
           animation: gradient 15s ease infinite;
         }
 
         .artist {
-          font-size: 16px;
+          color: #9f9f9f;
+          font-size: 20px;
           margin-top: 4px;
+          margin-bottom: 5px;
+          overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
-          overflow: hidden;
           max-width: 100%;
           background: linear-gradient(
             -125deg,
@@ -74,22 +95,29 @@
             rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
           );
           background-size: 200% 100%;
+          background-position: 0% 50%;
           -webkit-text-fill-color: transparent;
           -webkit-background-clip: text;
+          -webkit-box-decoration-break: clone;
+          box-decoration-break: clone;
           animation: gradient 12s ease infinite;
         }
 
-        /* ✅ Audio bars visible on ALL screens */
+        /* bars now in document flow so they show on mobile and desktop the same way as original */
         #bars {
-          margin-top: 10px;
+          margin-top: 6px;
           display: flex;
-          justify-content: center;
-          gap: 2px;
+          align-items: flex-end; /* bars grow upward */
+          gap: 3px;
+          height: 20px;
         }
 
+        /* base bar style. animation timing and delays can still come from your {{barCSS}} template */
         .bar {
           width: 3px;
-          height: 15px;
+          height: 6px; /* base height, pulse will scale it visually */
+          border-radius: 2px;
+          transform-origin: bottom center;
           background: linear-gradient(
             90deg,
             rgb({{ barPalette[0][0] }}, {{ barPalette[0][1] }}, {{ barPalette[0][2] }}) 0%,
@@ -97,56 +125,59 @@
             rgb({{ barPalette[2][0] }}, {{ barPalette[2][1] }}, {{ barPalette[2][2] }}) 66%,
             rgb({{ barPalette[3][0] }}, {{ barPalette[3][1] }}, {{ barPalette[3][2] }}) 100%
           );
-          border-radius: 2px;
-          animation: pulse 0ms -800ms ease-in infinite alternate, gradient 15s ease infinite;
+          background-size: 200% 100%;
+          background-position: 0% 50%;
+          -webkit-background-clip: padding-box;
+          /* two animations together
+            • gradient keeps the color shift similar to your original
+            • pulse scales the bar up and down to emulate the audio meter
+          */
+          animation: gradient 15s ease infinite, pulse 900ms ease-in-out infinite;
         }
 
+        /* gradient move keyframes */
         @keyframes gradient {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
 
+        /* pulse keyframes use transform scale so layout does not re flow */
         @keyframes pulse {
-          0% { height: 4px; opacity: .35; }
-          100% { height: 18px; opacity: .95; }
+          0% { transform: scaleY(0.22); opacity: 0.35; }
+          40% { transform: scaleY(1.00); opacity: 0.95; }
+          100% { transform: scaleY(0.30); opacity: 0.55; }
         }
 
-        a {
-          text-decoration: none;
+        /* keep links clean */
+        a { text-decoration: none; color: inherit; }
+
+        div { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"; }
+
+        /* responsive tweaks while keeping the same left image right text layout on mobile */
+        @media (max-width: 420px) {
+          .main { gap: 8px; }
+          .art { flex: 0 0 80px; }
+          .cover { width: 80px; height: 80px; border-radius: 6px; }
+          .song { font-size: 20px; }
+          .artist { font-size: 16px; }
+          #bars { height: 16px; margin-top: 4px; gap: 2px; }
+          .bar { width: 3px; }
         }
 
-        div {
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif;
-        }
-
-        /* ✅ Mobile Responsiveness */
-        @media (max-width: 600px) {
-          .main {
-            flex-direction: column;
-            text-align: center;
-          }
-          .cover {
-            width: 80px;
-            height: 80px;
-          }
-          .song {
-            font-size: 18px;
-          }
-          .artist {
-            font-size: 14px;
-          }
-          #bars {
-            margin-top: 6px;
-          }
-        }
-
+        /* preserve any per bar nth rules coming from your server side variable */
         {{barCSS|safe}}
+
       </style>
+
+      <!-- currentStatus retained but commented out as in your original -->
+      <!-- <div class="currentStatus" color="white">{{status}}</div> -->
 
       <div class="main">
         <a class="art" href="{}" target="_blank">
-          <img src="data:image/png;base64, {{image}}" class="cover" />
+          <center>
+            <img src="data:image/png;base64, {{image}}" class="cover" />
+          </center>
         </a>
 
         <div class="content">
@@ -156,9 +187,12 @@
           <a href="{{artistURI}}" target="_blank">
             <div class="artist">{{artistName}}</div>
           </a>
+
+          <!-- your dynamic bar markup goes here like before -->
           <div id="bars">{{contentBar|safe}}</div>
         </div>
       </div>
+
     </div>
   </foreignObject>
 </svg>
