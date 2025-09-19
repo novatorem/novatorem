@@ -15,7 +15,8 @@ modifications:
 
 <div align="left">
    <ul>
-     <li>glassmorphism design.</li>
+     <li>glassmorphism design (dark/light)</li>
      <li>make the contentBar shows both desktop and mobile.</li>
+       <li>bg is glassmorpism, and the tint is getting from the album art.</li>
    </ul>
 </div>
