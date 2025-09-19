@@ -129,7 +129,7 @@ def loadImageB64(url):
 
 def makeSVG(data, background_color, border_color):
     barCount = 84
-    # contentBar = ""
+    contentBar = ""
     barCSS = barGen(barCount)
 
     # Determine what to display based on the 'data' passed
