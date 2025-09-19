@@ -4,6 +4,8 @@ import json
 import random
 import requests
 from requests.exceptions import RequestException
+import threading
+import time
 
 from colorthief import ColorThief
 from base64 import b64encode
@@ -31,6 +33,11 @@ RECENTLY_PLAYING_URL = (
 )
 
 app = Flask(__name__)
+
+# Global variable to store the last displayed track ID
+last_track_id = None
+track_history = []
+HISTORY_SIZE = 10 # Number of unique tracks to remember
 
 def getAuth():
     return b64encode(f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_SECRET_ID}".encode()).decode(
@@ -127,6 +134,8 @@ def loadImageB64(url):
         return PLACEHOLDER_IMAGE
 
 def makeSVG(data, background_color, border_color):
+    global last_track_id, track_history
+    
     barCount = 84
     barCSS = barGen(barCount)
     contentBar = ""
@@ -139,23 +148,42 @@ def makeSVG(data, background_color, border_color):
         item = data["item"]
         currentStatus = "Vibing to:"
         contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+        # Update last_track_id if a new track is playing
+        if item and item.get("id") != last_track_id:
+            last_track_id = item.get("id")
+            # Clear history to prepare for a new 'random' selection when music stops
+            track_history = []
     else:
         # If not playing, get a random recently played track
         currentStatus = "Recently played:"
         try:
-            # Fetch more tracks for a better random selection
             recent_plays = get(RECENTLY_PLAYING_URL + "?limit=50")
             if recent_plays and "items" in recent_plays and recent_plays["items"]:
                 
                 # Get a list of all tracks from the response
                 all_tracks = [played_item["track"] for played_item in recent_plays["items"]]
                 
-                # Select a random track from the list
-                random_track = random.choice(all_tracks)
-                item = random_track
-                contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+                # Filter out the track that was just played and tracks in history
+                available_tracks = [t for t in all_tracks if t.get("id") not in track_history]
+                
+                if not available_tracks and len(all_tracks) > 0:
+                    # If all tracks are in history, just reset and choose from all
+                    track_history = []
+                    available_tracks = all_tracks
+                
+                if available_tracks:
+                    # Select a random track from the filtered list
+                    random_track = random.choice(available_tracks)
+                    item = random_track
+                    contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+                    
+                    # Update history
+                    track_id = item.get("id")
+                    if track_id:
+                        track_history.append(track_id)
+                        if len(track_history) > HISTORY_SIZE:
+                            track_history.pop(0)
             else:
-                # No recent plays available
                 currentStatus = "No music playing"
                 contentBar = ""  # No bars if no music is found
         except Exception as e:
@@ -163,7 +191,7 @@ def makeSVG(data, background_color, border_color):
             currentStatus = "No music playing"
             contentBar = ""
             
-    # Process the selected item (either currently playing or recently played)
+    # Process the selected item
     if item:
         if item["album"]["images"] and len(item["album"]["images"]) > 1:
             image_url = item["album"]["images"][1]["url"]
@@ -228,4 +256,3 @@ def catch_all(path):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=os.getenv("PORT") or 5000)
-
