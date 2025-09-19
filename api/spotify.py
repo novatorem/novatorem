@@ -30,6 +30,9 @@ RECENTLY_PLAYING_URL = (
     "https://api.spotify.com/v1/me/player/recently-played"
 )
 
+# New fallback playlist URL
+FALLBACK_PLAYLIST_URL = "https://open.spotify.com/playlist/1kW0XCEDGIRvn3gjhxiwV8"
+
 app = Flask(__name__)
 
 # Global variable to cache the last track
@@ -173,19 +176,30 @@ def makeSVG(data, background_color, border_color):
                         item = None
                         currentStatus = "No music playing"
                         contentBar = ""
-            else:
+            elif last_known_track:
                 # Fallback to cached track if no new recent play is found
-                if last_known_track:
-                    item = last_known_track
-                    currentStatus = "Last played:"
-                    contentBar = ""
+                item = last_known_track
+                currentStatus = "Last played:"
+                contentBar = ""
+            else:
+                # Step 3: All other options failed, try the fallback playlist
+                playlist_data = get(FALLBACK_PLAYLIST_URL)
+                if playlist_data and "tracks" in playlist_data and "items" in playlist_data["tracks"]:
+                    playlist_tracks = [track["track"] for track in playlist_data["tracks"]["items"]]
+                    if playlist_tracks:
+                        item = random.choice(playlist_tracks)
+                        currentStatus = "Featured playlist:"
+                        contentBar = "" # No bars for static playlist track
+                    else:
+                        item = None
+                        currentStatus = "No music playing"
+                        contentBar = ""
                 else:
                     item = None
                     currentStatus = "No music playing"
                     contentBar = ""
         except Exception as e:
-            print(f"Error fetching recently played data: {e}")
-            # Use cached track on API error
+            print(f"Error fetching data: {e}")
             if last_known_track:
                 item = last_known_track
                 currentStatus = "Last played:"
@@ -260,4 +274,3 @@ def catch_all(path):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=os.getenv("PORT") or 5000)
-
