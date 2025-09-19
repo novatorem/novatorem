@@ -30,9 +30,9 @@
         }
 
         .pill-cover {
-          width: 80px;
-          height: 80px;
-          border-radius: 50%; /* round image inside pill */
+          width: 84px;
+          height: 84px;
+          border-radius: 50%;
           object-fit: cover;
           display: block;
         }
@@ -46,9 +46,9 @@
         }
 
         .pill-song {
-          font-size: 20px;
-          font-weight: 600;
-          margin: 0;
+          font-size: 22px; /* bumped up */
+          font-weight: 700;
+          margin: 0 0 2px 0;
           white-space: nowrap;
           text-overflow: ellipsis;
           overflow: hidden;
@@ -65,8 +65,8 @@
         }
 
         .pill-artist {
-          font-size: 15px;
-          margin: 2px 0 6px 0;
+          font-size: 17px; /* bumped up */
+          margin: 0 0 6px 0;
           white-space: nowrap;
           text-overflow: ellipsis;
           overflow: hidden;
@@ -82,13 +82,14 @@
           animation: gradient 12s ease infinite;
         }
 
-        /* ✅ Bars: keep same names so {{contentBar}} works */
+        /* ✅ Bars more compact + lifted */
         #bars {
           display: flex;
           justify-content: flex-start;
           align-items: flex-end;
           gap: 3px;
-          height: 18px;
+          height: 14px;   /* tighter */
+          margin-top: 2px; /* keeps a lil breathing space */
         }
 
         .bar {
@@ -128,17 +129,17 @@
         /* 📱 Mobile tweaks */
         @media (max-width: 480px) {
           .pill-cover {
-            width: 70px;
-            height: 70px;
+            width: 72px;
+            height: 72px;
           }
           .pill-song {
-            font-size: 18px;
+            font-size: 20px;
           }
           .pill-artist {
-            font-size: 14px;
+            font-size: 16px;
           }
           #bars {
-            height: 16px;
+            height: 12px;
           }
         }
 
@@ -157,7 +158,6 @@
           <a href="{{artistURI}}" target="_blank">
             <div class="pill-artist">{{artistName}}</div>
           </a>
-          <!-- ✅ Now works: uses same #bars + .bar -->
           <div id="bars">{{contentBar|safe}}</div>
         </div>
       </div>
