@@ -18,5 +18,6 @@ modifications:
      <li>glassmorphism design (dark/light)</li>
      <li>make the contentBar shows both desktop and mobile.</li>
        <li>bg is glassmorpism, and the tint is getting from the album art.</li>
+       <li>content bar is slighlty changing colors like glitch mob</li>
    </ul>
 </div>
