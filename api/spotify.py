@@ -15,7 +15,7 @@ load_dotenv(find_dotenv())
 # Spotify scopes:
 #   user-read-currently-playing
 #   user-read-recently-played
-PLACEHOLDER_IMAGE = "(too long to paste here)"
+PLACEHOLDER_IMAGE = ""
 PLACEHOLDER_URL = "https://source.unsplash.com/random/300x300/?aerial"
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_SECRET_ID = os.getenv("SPOTIFY_SECRET_ID")
@@ -80,7 +80,6 @@ def get(url):
     
     return response.json()
 
-
 def barGen(barCount):
     barCSS = ""
     left = 1
@@ -129,52 +128,38 @@ def loadImageB64(url):
 
 def makeSVG(data, background_color, border_color):
     barCount = 84
-    contentBar = ""
     barCSS = barGen(barCount)
+    contentBar = ""
 
-    # Determine what to display based on the 'data' passed
+    item = None
+    currentStatus = ""
+
+    # Check for currently playing song
     if data and "item" in data:
-        # Currently playing
         item = data["item"]
         currentStatus = "Vibing to:"
         # Set contentBar to show bars if a song is playing
         contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
     else:
-        # Not currently playing, use recently played
+        # If not playing, get a random recently played track
         currentStatus = "Recently played:"
-        recentPlays = get(RECENTLY_PLAYING_URL)
-        if not recentPlays or "items" not in recentPlays or not recentPlays["items"]:
-            # If no recent plays are available, use placeholders
-            item = None
-            image = PLACEHOLDER_IMAGE
-            barPalette = gradientGen(PLACEHOLDER_URL, 4)
-            songPalette = gradientGen(PLACEHOLDER_URL, 2)
-            artistName = "No music playing"
-            songName = "Check back later"
-            songURI = "#"
-            artistURI = "#"
-            contentBar = "" # Hide the EQ bars
-            dataDict = {
-                "contentBar": contentBar,
-                "barCSS": barCSS,
-                "artistName": artistName,
-                "songName": songName,
-                "songURI": songURI,
-                "artistURI": artistURI,
-                "image": image,
-                "status": currentStatus,
-                "background_color": background_color,
-                "border_color": border_color,
-                "barPalette": barPalette,
-                "songPalette": songPalette
-            }
-            return render_template(getTemplate(), **dataDict)
-
-        # Get the most recent track
-        item = recentPlays["items"][0]["track"]
-        contentBar = "" # Hide the EQ bars
-
-    # If an item was found, process it
+        try:
+            recent_plays = get(RECENTLY_PLAYING_URL + "?limit=50") # Fetch more tracks to get a better random choice
+            if recent_plays and "items" in recent_plays and recent_plays["items"]:
+                # Select a random track from the recently played list
+                random_play = random.choice(recent_plays["items"])
+                item = random_play["track"]
+                contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+            else:
+                # No recent plays available
+                currentStatus = "No music playing"
+                contentBar = "" # No bars if no music is found
+        except Exception as e:
+            print(f"Error fetching recently played data: {e}")
+            currentStatus = "No music playing"
+            contentBar = ""
+            
+    # Process the selected item (either currently playing or recently played)
     if item:
         if item["album"]["images"] and len(item["album"]["images"]) > 1:
             image_url = item["album"]["images"][1]["url"]
@@ -191,7 +176,7 @@ def makeSVG(data, background_color, border_color):
         songURI = item["external_urls"]["spotify"]
         artistURI = item["artists"][0]["external_urls"]["spotify"]
     else:
-        # Fallback for when no music data is available
+        # Fallback for when no music data is available at all
         image = PLACEHOLDER_IMAGE
         barPalette = gradientGen(PLACEHOLDER_URL, 4)
         songPalette = gradientGen(PLACEHOLDER_URL, 2)
@@ -199,7 +184,6 @@ def makeSVG(data, background_color, border_color):
         songName = "Check back later"
         songURI = "#"
         artistURI = "#"
-        contentBar = ""
 
     dataDict = {
         "contentBar": contentBar,
@@ -225,13 +209,13 @@ def catch_all(path):
     background_color = request.args.get('background_color') or "181414"
     border_color = request.args.get('border_color') or "181414"
 
+    data = None
     try:
         # First, try to get the currently playing song
         data = get(NOW_PLAYING_URL)
     except Exception as e:
         print(f"Error fetching currently playing data: {e}")
-        data = None  # Set data to None to trigger the "recently played" logic
-
+    
     svg = makeSVG(data, background_color, border_color)
 
     resp = Response(svg, mimetype="image/svg+xml")
