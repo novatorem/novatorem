@@ -143,16 +143,30 @@ def makeSVG(data, background_color, border_color):
         # If not playing, get a random recently played track
         currentStatus = "Recently played:"
         try:
-            recent_plays = get(RECENTLY_PLAYING_URL + "?limit=50") # Fetch more tracks to get a better random choice
+            # Fetch more tracks for a better random selection
+            recent_plays = get(RECENTLY_PLAYING_URL + "?limit=50")
             if recent_plays and "items" in recent_plays and recent_plays["items"]:
-                # Select a random track from the recently played list
-                random_play = random.choice(recent_plays["items"])
-                item = random_play["track"]
-                contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+                
+                # Create a list of unique tracks to choose from
+                unique_tracks = {}
+                for played_item in recent_plays["items"]:
+                    track = played_item["track"]
+                    # Use the track ID to ensure uniqueness
+                    if track["id"] not in unique_tracks:
+                        unique_tracks[track["id"]] = track
+                
+                # Convert the unique tracks to a list and select a random one
+                if unique_tracks:
+                    random_track = random.choice(list(unique_tracks.values()))
+                    item = random_track
+                    contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+                else:
+                    currentStatus = "No music played recently"
+                    contentBar = ""
             else:
                 # No recent plays available
                 currentStatus = "No music playing"
-                contentBar = "" # No bars if no music is found
+                contentBar = ""  # No bars if no music is found
         except Exception as e:
             print(f"Error fetching recently played data: {e}")
             currentStatus = "No music playing"
@@ -200,6 +214,7 @@ def makeSVG(data, background_color, border_color):
     }
 
     return render_template(getTemplate(), **dataDict)
+
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
