@@ -82,7 +82,8 @@
           animation: gradient 12s ease infinite;
         }
 
-        #pill-bars {
+        /* ✅ Bars: keep same names so {{contentBar}} works */
+        #bars {
           display: flex;
           justify-content: flex-start;
           align-items: flex-end;
@@ -90,7 +91,7 @@
           height: 18px;
         }
 
-        .pill-bar {
+        .bar {
           width: 3px;
           height: 6px;
           border-radius: 2px;
@@ -136,7 +137,7 @@
           .pill-artist {
             font-size: 14px;
           }
-          #pill-bars {
+          #bars {
             height: 16px;
           }
         }
@@ -156,7 +157,8 @@
           <a href="{{artistURI}}" target="_blank">
             <div class="pill-artist">{{artistName}}</div>
           </a>
-          <div id="pill-bars">{{contentBar|safe}}</div>
+          <!-- ✅ Now works: uses same #bars + .bar -->
+          <div id="bars">{{contentBar|safe}}</div>
         </div>
       </div>
     </div>
