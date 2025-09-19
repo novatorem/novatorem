@@ -1,193 +1,180 @@
 <svg viewBox="0 0 480 133" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <foreignObject width="480" height="133" preserveAspectRatio="xMidYMid meet">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="container">
-            <style>
-                .main {
-                    display: flex;
-                }
+  <foreignObject width="480" height="133">
+    <div xmlns="http://www.w3.org/1999/xhtml" class="container">
+      <style>
+        /* Reset */
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
 
-                .currentStatus {
-                    float: left;
-                    color: #f7f7f7;
-                    font-size: 24px;
-                    position: static;
-                    margin-top: -5px;
-                    margin-left: 10px;
-                    background: linear-gradient(
-                                    -125deg, 
-                                    rgb({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}),
-                                    rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
-                                );                    
-                    background-size: 200% 100%;
-                    background-position: 0% 50%;
-                    -webkit-text-fill-color: transparent;
-                    -webkit-background-clip: text;
-                    -webkit-box-decoration-break: clone;
-                    box-decoration-break: clone;
-                    animation: gradient 17s ease infinite;
-                }
-                
-                .container {
-                    border-radius: 5px;
-                    padding: 10px 10px 10px 0px;
-                    background-color: #{{background_color}};
-                    border: 1px solid #{{border_color}};
-                }
+        div {
+          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
+        }
 
-                .art {
-                    width: 27%;
-                    float: left;
-                    margin-left: -5px;
-                }
+        a {
+          text-decoration: none;
+        }
 
-                .content {
-                    width: 71%;
-                }
+        /* Container with glassmorphism */
+        .container {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          padding: 10px;
+          border-radius: 15px;
+          background: rgba(20, 20, 30, 0.6); /* dark semi-transparent */
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          width: 100%;
+          max-width: 480px;
+          margin: auto;
+          overflow: hidden;
+          position: relative;
+        }
 
-                .song {
-                    width: 330px;
-                    color: #666;
-                    overflow: hidden;
-                    margin-top: 3px;
-                    font-size: 24px;
-                    text-align: center;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
-                    background: linear-gradient(
-                                    125deg, 
-                                    rgb({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}),
-                                    rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
-                                );
-                    background-size: 200% 100%;
-                    background-position: 0% 50%;
-                    -webkit-text-fill-color: transparent;
-                    -webkit-background-clip: text;
-                    -webkit-box-decoration-break: clone;
-                    box-decoration-break: clone;
-                    animation: gradient 15s ease infinite;
-                }
+        .main {
+          display: flex;
+          flex: 1;
+          align-items: center;
+          gap: 10px;
+        }
 
-                .artist {
-                    width: 330px;
-                    color: #9f9f9f;
-                    font-size: 20px;
-                    margin-top: 4px;
-                    text-align: center;
-                    margin-bottom: 5px;
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
-                    background: linear-gradient(
-                                    -125deg, 
-                                    rgb({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}),
-                                    rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
-                                );                    
-                    background-size: 200% 100%;
-                    background-position: 0% 50%;
-                    -webkit-text-fill-color: transparent;
-                    -webkit-background-clip: text;
-                    -webkit-box-decoration-break: clone;
-                    box-decoration-break: clone;
-                    animation: gradient 12s ease infinite;
-                }
+        /* Album Art */
+        .art {
+          flex: 0 0 80px;
+        }
 
-                .cover {
-                    width: 100px;
-                    height: 100px;
-                    border-radius: 5px;
-                }
+        .cover {
+          width: 80px;
+          height: 80px;
+          border-radius: 12px;
+          object-fit: cover;
+        }
 
-                #bars {
-                    bottom: 23px;
-                    position: absolute;
-                    margin: -20px 0 0 0px;
-                }
+        /* Song Info */
+        .content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 4px;
+          min-width: 0;
+        }
 
-                .bar {
-                    width: 3px;
-                    bottom: 1px;
-                    height: 15px;
-                    position: absolute;
-                    background: #5433FF;  /* fallback for old browsers */
-                    background: -webkit-linear-gradient(to right, #20BDFF, #ab66ff, #5433FF, #20BDFF);  /* Chrome 10-25, Safari 5.1-6 */
-                    background: linear-gradient(
-                                    90deg, 
-                                    rgb({{ barPalette[0][0] }}, {{ barPalette[0][1] }}, {{ barPalette[0][2] }}) 0%, 
-                                    rgb({{ barPalette[1][0] }}, {{ barPalette[1][1] }}, {{ barPalette[1][2] }}) 33%, 
-                                    rgb({{ barPalette[2][0] }}, {{ barPalette[2][1] }}, {{ barPalette[2][2] }}) 66%, 
-                                    rgb({{ barPalette[3][0] }}, {{ barPalette[3][1] }}, {{ barPalette[3][2] }}) 100%
-                                );
-                    background-size: 200% 100%;
-                    background-position: 0% 50%;
-                    background-attachment: fixed;
-                    animation: gradient 15s ease infinite, pulse 0ms -800ms ease-in infinite alternate;
-                }
-                
-                .spotify-logo {
-                    position: fixed;
-                    right: 20px;
-                    top: 10px;
-                    width: 25px;
-                    filter: invert(1);
-                }
+        .song, .artist {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          font-weight: 600;
+        }
 
-                a {
-                    text-decoration: none;
-                }
+        .song {
+          font-size: 18px;
+          background: linear-gradient(
+            125deg,
+            rgb({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}),
+            rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
+          );
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: gradient 15s ease infinite;
+        }
 
-                div {
-                    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
-                }
+        .artist {
+          font-size: 14px;
+          color: #bbb;
+          background: linear-gradient(
+            -125deg,
+            rgb({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}),
+            rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
+          );
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: gradient 12s ease infinite;
+        }
 
-                @keyframes gradient {
-                    0% {
-                        background-position: 0% 50%;
-                    }
-                    50% {
-                        background-position: 100% 50%;
-                    }
-                    100% {
-                        background-position: 0% 50%;
-                    }
-                }
-                
-                @keyframes pulse {
-                    0% {
-                        height: 3px;
-                        opacity: .35;
-                    }
-                    100% {
-                        height: 15px;
-                        opacity: 0.95
-                    }
-                }
+        /* Bars Animation */
+        #bars {
+          display: flex;
+          gap: 3px;
+          margin-top: 4px;
+        }
 
-                {{barCSS|safe}}
-            </style>
+        .bar {
+          flex: 1;
+          height: 15px;
+          background: linear-gradient(
+            90deg,
+            rgb({{ barPalette[0][0] }}, {{ barPalette[0][1] }}, {{ barPalette[0][2] }}) 0%,
+            rgb({{ barPalette[1][0] }}, {{ barPalette[1][1] }}, {{ barPalette[1][2] }}) 33%,
+            rgb({{ barPalette[2][0] }}, {{ barPalette[2][1] }}, {{ barPalette[2][2] }}) 66%,
+            rgb({{ barPalette[3][0] }}, {{ barPalette[3][1] }}, {{ barPalette[3][2] }}) 100%
+          );
+          background-size: 200% 100%;
+          animation: gradient 15s ease infinite, pulse 1s ease-in-out infinite alternate;
+        }
 
-            <!-- <div class="currentStatus" color="white">{{status}}</div> -->
+        /* Animations */
+        @keyframes gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
 
-            <div class="main">
-                <a class="art" href="{}" target="_blank">
-                    <center>
-                        <img src="data:image/png;base64, {{image}}" class="cover" />
-                    </center>
-                </a>
+        @keyframes pulse {
+          0% { height: 5px; opacity: 0.4; }
+          100% { height: 15px; opacity: 1; }
+        }
 
-                <div class="content">
-                    <a href="{{songURI}}" target="_blank">
-                        <div class="song">{{songName}}</div>
-                    </a>
-                    <a href="{{artistURI}}" target="_blank">
-                        <div class="artist">{{artistName}}</div>
-                    </a>
-                    <div id="bars">{{contentBar|safe}}</div> 
-                    <!-- <a href="{{songURI}}" class="spotify-logo">
-                        <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Spotify</title><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-                    </a> -->
-                </div>
-            </div>
+        /* Responsive */
+        @media (max-width: 480px) {
+          .container {
+            flex-direction: column;
+            padding: 10px 8px;
+            border-radius: 12px;
+          }
 
+          .main {
+            flex-direction: row;
+            gap: 8px;
+          }
+
+          .cover {
+            width: 60px;
+            height: 60px;
+          }
+
+          .song {
+            font-size: 16px;
+          }
+
+          .artist {
+            font-size: 12px;
+          }
+
+          #bars .bar {
+            height: 10px;
+          }
+        }
+      </style>
+
+      <div class="main">
+        <a class="art" href="{{songURI}}" target="_blank">
+          <img src="data:image/png;base64, {{image}}" class="cover" />
+        </a>
+
+        <div class="content">
+          <a href="{{songURI}}" target="_blank">
+            <div class="song">{{songName}}</div>
+          </a>
+          <a href="{{artistURI}}" target="_blank">
+            <div class="artist">{{artistName}}</div>
+          </a>
+          <div id="bars">{{contentBar|safe}}</div>
         </div>
-    </foreignObject>
+      </div>
+    </div>
+  </foreignObject>
 </svg>
