@@ -153,7 +153,7 @@ def makeSVG(data, background_color, border_color):
             songName = "Check back later"
             songURI = "#"
             artistURI = "#"
-           # contentBar = "" # Hide the EQ bars
+            contentBar = "" # Hide the EQ bars
             dataDict = {
                 "contentBar": contentBar,
                 "barCSS": barCSS,
