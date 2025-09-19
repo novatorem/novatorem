@@ -4,8 +4,6 @@ import json
 import random
 import requests
 from requests.exceptions import RequestException
-import threading
-import time
 
 from colorthief import ColorThief
 from base64 import b64encode
@@ -33,6 +31,9 @@ RECENTLY_PLAYING_URL = (
 )
 
 app = Flask(__name__)
+
+# Global variable to cache the last successfully retrieved track
+last_successful_track = None
 
 def getAuth():
     return b64encode(f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_SECRET_ID}".encode()).decode(
@@ -129,6 +130,8 @@ def loadImageB64(url):
         return PLACEHOLDER_IMAGE
 
 def makeSVG(data, background_color, border_color):
+    global last_successful_track
+    
     barCount = 84
     barCSS = barGen(barCount)
     contentBar = ""
@@ -136,29 +139,44 @@ def makeSVG(data, background_color, border_color):
     item = None
     currentStatus = ""
 
-    # Check for currently playing song
+    # Step 1: Check for currently playing song
     if data and "item" in data:
         item = data["item"]
         currentStatus = "Vibing to:"
         contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+        last_successful_track = item # Cache the currently playing track
     else:
-        # If not playing, get the very last played track
-        currentStatus = "Recently played:"
+        # Step 2: If not playing, try to get the very last played track
         try:
-            # Get the most recent track by requesting a limit of 1
             recent_plays = get(RECENTLY_PLAYING_URL + "?limit=1")
             
-            # Check if a track was returned
             if recent_plays and "items" in recent_plays and recent_plays["items"]:
                 item = recent_plays["items"][0]["track"]
+                currentStatus = "Recently played:"
                 contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+                last_successful_track = item # Cache the recently played track
             else:
-                currentStatus = "No music playing"
-                contentBar = ""  # No bars if no music is found
+                # Step 3: If API is empty, use the cached track
+                if last_successful_track:
+                    item = last_successful_track
+                    currentStatus = "Last played:" # New status for clarity
+                    contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+                else:
+                    # Final fallback if nothing is found or cached
+                    item = None
+                    currentStatus = "No music playing"
+                    contentBar = ""
         except Exception as e:
             print(f"Error fetching recently played data: {e}")
-            currentStatus = "No music playing"
-            contentBar = ""
+            # Use cached track on API error
+            if last_successful_track:
+                item = last_successful_track
+                currentStatus = "Last played:"
+                contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+            else:
+                item = None
+                currentStatus = "No music playing"
+                contentBar = ""
             
     # Process the selected item
     if item:
