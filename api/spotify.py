@@ -32,10 +32,9 @@ RECENTLY_PLAYING_URL = (
 
 app = Flask(__name__)
 
-# Global variable to cache the last track played for more than 30 seconds
-last_30s_track = None
-# Global variable to hold the last fetched playing track's ID
-last_playing_track_id = None
+# Global variable to cache the last track
+last_known_track = None
+last_known_track_id = None
 
 def getAuth():
     return b64encode(f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_SECRET_ID}".encode()).decode(
@@ -132,7 +131,7 @@ def loadImageB64(url):
         return PLACEHOLDER_IMAGE
 
 def makeSVG(data, background_color, border_color):
-    global last_30s_track, last_playing_track_id
+    global last_known_track, last_known_track_id
     
     barCount = 84
     barCSS = barGen(barCount)
@@ -140,28 +139,62 @@ def makeSVG(data, background_color, border_color):
     item = None
     currentStatus = ""
 
-    # Step 1: Check for currently playing song
-    if data and "item" in data:
+    # Step 1: Try to get the currently playing song
+    if data and "item" in data and data.get("is_playing"):
         item = data["item"]
         currentStatus = "Vibing to:"
         contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
         
-        # Check if the track has played for more than 30 seconds
-        if data["progress_ms"] > 30000 and last_playing_track_id != item["id"]:
-            last_30s_track = item
-            last_playing_track_id = item["id"]
+        # Update cache with the new currently playing track
+        if item.get("id") != last_known_track_id:
+            last_known_track = item
+            last_known_track_id = item.get("id")
     else:
-        # Step 2: If nothing is playing, display the last_30s_track
-        if last_30s_track:
-            item = last_30s_track
-            currentStatus = "Last played:"
-            contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
-        else:
-            # Step 3: Initial state or if no track has played for >30s
-            item = None
-            currentStatus = "No music playing"
-            contentBar = ""
-
+        # Step 2: If nothing is playing, try to get the most recent track
+        try:
+            recent_plays = get(RECENTLY_PLAYING_URL + "?limit=1")
+            
+            # Check if a new track is found in recently played
+            if recent_plays and "items" in recent_plays and recent_plays["items"]:
+                most_recent_track = recent_plays["items"][0]["track"]
+                if most_recent_track.get("id") != last_known_track_id:
+                    item = most_recent_track
+                    last_known_track = item
+                    last_known_track_id = item.get("id")
+                    currentStatus = "Recently played:"
+                    contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+                else:
+                    # If the most recent track is the same as the last one, use the cached track
+                    if last_known_track:
+                        item = last_known_track
+                        currentStatus = "Last played:"
+                        contentBar = "" # No bars if not playing
+                    else:
+                        item = None
+                        currentStatus = "No music playing"
+                        contentBar = ""
+            else:
+                # Fallback to cached track if no new recent play is found
+                if last_known_track:
+                    item = last_known_track
+                    currentStatus = "Last played:"
+                    contentBar = ""
+                else:
+                    item = None
+                    currentStatus = "No music playing"
+                    contentBar = ""
+        except Exception as e:
+            print(f"Error fetching recently played data: {e}")
+            # Use cached track on API error
+            if last_known_track:
+                item = last_known_track
+                currentStatus = "Last played:"
+                contentBar = ""
+            else:
+                item = None
+                currentStatus = "No music playing"
+                contentBar = ""
+            
     # Process the selected item
     if item:
         if item["album"]["images"] and len(item["album"]["images"]) > 1:
@@ -227,3 +260,4 @@ def catch_all(path):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=os.getenv("PORT") or 5000)
+
