@@ -34,11 +34,6 @@ RECENTLY_PLAYING_URL = (
 
 app = Flask(__name__)
 
-# Global variable to store the last displayed track ID
-last_track_id = None
-track_history = []
-HISTORY_SIZE = 10 # Number of unique tracks to remember
-
 def getAuth():
     return b64encode(f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_SECRET_ID}".encode()).decode(
         "ascii"
@@ -134,8 +129,6 @@ def loadImageB64(url):
         return PLACEHOLDER_IMAGE
 
 def makeSVG(data, background_color, border_color):
-    global last_track_id, track_history
-    
     barCount = 84
     barCSS = barGen(barCount)
     contentBar = ""
@@ -148,41 +141,17 @@ def makeSVG(data, background_color, border_color):
         item = data["item"]
         currentStatus = "Vibing to:"
         contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
-        # Update last_track_id if a new track is playing
-        if item and item.get("id") != last_track_id:
-            last_track_id = item.get("id")
-            # Clear history to prepare for a new 'random' selection when music stops
-            track_history = []
     else:
-        # If not playing, get a random recently played track
+        # If not playing, get the very last played track
         currentStatus = "Recently played:"
         try:
-            recent_plays = get(RECENTLY_PLAYING_URL + "?limit=50")
+            # Get the most recent track by requesting a limit of 1
+            recent_plays = get(RECENTLY_PLAYING_URL + "?limit=1")
+            
+            # Check if a track was returned
             if recent_plays and "items" in recent_plays and recent_plays["items"]:
-                
-                # Get a list of all tracks from the response
-                all_tracks = [played_item["track"] for played_item in recent_plays["items"]]
-                
-                # Filter out the track that was just played and tracks in history
-                available_tracks = [t for t in all_tracks if t.get("id") not in track_history]
-                
-                if not available_tracks and len(all_tracks) > 0:
-                    # If all tracks are in history, just reset and choose from all
-                    track_history = []
-                    available_tracks = all_tracks
-                
-                if available_tracks:
-                    # Select a random track from the filtered list
-                    random_track = random.choice(available_tracks)
-                    item = random_track
-                    contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
-                    
-                    # Update history
-                    track_id = item.get("id")
-                    if track_id:
-                        track_history.append(track_id)
-                        if len(track_history) > HISTORY_SIZE:
-                            track_history.pop(0)
+                item = recent_plays["items"][0]["track"]
+                contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
             else:
                 currentStatus = "No music playing"
                 contentBar = ""  # No bars if no music is found
