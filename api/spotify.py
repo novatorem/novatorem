@@ -172,7 +172,7 @@ def makeSVG(data, background_color, border_color):
 
         # Get the most recent track
         item = recentPlays["items"][0]["track"]
-        contentBar = "" # Hide the EQ bars
+       # contentBar = "" Hide the EQ bars.
 
     # If an item was found, process it
     if item:
