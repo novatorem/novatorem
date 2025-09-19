@@ -153,7 +153,7 @@ def makeSVG(data, background_color, border_color):
             songName = "Check back later"
             songURI = "#"
             artistURI = "#"
-            contentBar = "" # Hide the EQ bars
+            contentBar = ""  # Keep this as an empty string if nothing is playing
             dataDict = {
                 "contentBar": contentBar,
                 "barCSS": barCSS,
@@ -172,10 +172,12 @@ def makeSVG(data, background_color, border_color):
 
         # Get the most recent track
         item = recentPlays["items"][0]["track"]
-       # contentBar = "" Hide the EQ bars.
+        # The line 'contentBar = ""' was removed from here
 
-    # If an item was found, process it
+    # If an item was found, process it and generate bars
     if item:
+        # Generate the bars for both currently playing and recently played tracks
+        contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
         if item["album"]["images"] and len(item["album"]["images"]) > 1:
             image_url = item["album"]["images"][1]["url"]
             image = loadImageB64(image_url)
@@ -199,7 +201,7 @@ def makeSVG(data, background_color, border_color):
         songName = "Check back later"
         songURI = "#"
         artistURI = "#"
-      #  contentBar = ""
+        contentBar = "" # Still no bars if nothing is found
 
     dataDict = {
         "contentBar": contentBar,
