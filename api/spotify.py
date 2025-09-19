@@ -21,23 +21,6 @@ SPOTIFY_SECRET_ID = os.getenv("SPOTIFY_SECRET_ID")
 SPOTIFY_REFRESH_TOKEN = os.getenv("SPOTIFY_REFRESH_TOKEN")
 SPOTIFY_TOKEN = ""
 
-def refresh_token():
-    global SPOTIFY_TOKEN
-    auth_header = b64encode(f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_SECRET_ID}".encode()).decode()
-    response = requests.post(
-        REFRESH_TOKEN_URL,
-        data={"grant_type": "refresh_token", "refresh_token": SPOTIFY_REFRESH_TOKEN},
-        headers={"Authorization": f"Basic {auth_header}"},
-    )
-
-    if response.status_code == 200:
-        SPOTIFY_TOKEN = response.json()["access_token"]
-    else:
-        print("Error refreshing token:", response.text)
-        SPOTIFY_TOKEN = None
-
-refresh_token() #take token on startup.
-
 FALLBACK_THEME = "spotify.html.j2"
 
 REFRESH_TOKEN_URL = "https://accounts.spotify.com/api/token"
@@ -50,33 +33,27 @@ app = Flask(__name__)
 
 
 def getAuth():
-    """
-    Returns the base64-encoded client_id:client_secret for Spotify API auth.
-    """
-    auth_str = f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_SECRET_ID}"
-    return b64encode(auth_str.encode()).decode("utf-8")
+    return b64encode(f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_SECRET_ID}".encode()).decode(
+        "ascii"
+    )
 
 
 def refreshToken():
-    global SPOTIFY_TOKEN
+    data = {
+        "grant_type": "refresh_token",
+        "refresh_token": SPOTIFY_REFRESH_TOKEN,
+    }
+
+    headers = {"Authorization": "Basic {}".format(getAuth())}
     response = requests.post(
-        REFRESH_TOKEN_URL,
-        data={
-            "grant_type": "refresh_token",
-            "refresh_token": SPOTIFY_REFRESH_TOKEN,
-        },
-        headers={
-            "Authorization": f"Basic {getAuth()}",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
-    )
+        REFRESH_TOKEN_URL, data=data, headers=headers).json()
 
-    if response.status_code != 200:
-        print("Failed to refresh token:", response.json())
-        return None
-
-    SPOTIFY_TOKEN = response.json().get("access_token")
-    return SPOTIFY_TOKEN
+    try:
+        return response["access_token"]
+    except KeyError:
+        print(json.dumps(response))
+        print("\n---\n")
+        raise KeyError(str(response))
 
 
 def get(url):
