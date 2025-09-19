@@ -54,7 +54,6 @@ def refreshToken():
         print("\n---\n")
         raise KeyError(str(response))
 
-
 def get(url):
     global SPOTIFY_TOKEN
 
@@ -130,7 +129,7 @@ def loadImageB64(url):
 
 def makeSVG(data, background_color, border_color):
     barCount = 84
-    contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+    contentBar = ""
     barCSS = barGen(barCount)
 
     # Determine what to display based on the 'data' passed
@@ -171,8 +170,8 @@ def makeSVG(data, background_color, border_color):
             }
             return render_template(getTemplate(), **dataDict)
 
-        itemIndex = random.randint(0, len(recentPlays["items"]) - 1)
-        item = recentPlays["items"][itemIndex]["track"]
+        # Get the most recent track
+        item = recentPlays["items"][0]["track"]
         contentBar = "" # Hide the EQ bars
 
     # If an item was found, process it
@@ -187,8 +186,8 @@ def makeSVG(data, background_color, border_color):
             barPalette = gradientGen(PLACEHOLDER_URL, 4)
             songPalette = gradientGen(PLACEHOLDER_URL, 2)
         
-        artistName = item["artists"][0]["name"].replace("&", "&amp;")
-        songName = item["name"].replace("&", "&amp;")
+        artistName = item["artists"][0]["name"].replace("&", "&")
+        songName = item["name"].replace("&", "&")
         songURI = item["external_urls"]["spotify"]
         artistURI = item["artists"][0]["external_urls"]["spotify"]
     else:
