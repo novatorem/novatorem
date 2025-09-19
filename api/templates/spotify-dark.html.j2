@@ -9,10 +9,10 @@
           border-radius: 16px;
           padding: 12px;
           box-sizing: border-box;
-          background: rgba({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}, 0.2); /* New tinted background */
+          background: rgba({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}, 0.15); /* New tinted background */
           backdrop-filter: blur(14px) saturate(180%);
           -webkit-backdrop-filter: blur(14px) saturate(180%);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}, 0.15); /* New tinted border */
           display: flex;
           align-items: center;
         }
