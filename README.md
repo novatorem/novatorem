@@ -16,7 +16,7 @@ modifications:
 <div align="left">
    <ul>
      <li>glassmorphism design.</li>
-     <li>fixed the issue not displaying when nothing played.</li>
+     <li>fixed the issue: widget not displaying when nothing played. now it displayed the recent/last played track instead of nothing.</li>
      <li>make the contentBar shows both desktop and mobile.</li>
    </ul>
 </div>
