@@ -1,0 +1,164 @@
+<svg viewBox="0 0 480 120" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+  <foreignObject width="480" height="120" preserveAspectRatio="xMidYMid meet">
+    <div xmlns="http://www.w3.org/1999/xhtml" class="pill-container">
+      <style>
+        /* 🎵 Glass pill */
+        .pill-container {
+          width: 100%;
+          height: 100%;
+          border-radius: 60px; /* pill shape */
+          padding: 10px 16px;
+          box-sizing: border-box;
+          background: rgba({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}, 0.15);
+          backdrop-filter: blur(14px) saturate(180%);
+          -webkit-backdrop-filter: blur(14px) saturate(180%);
+          border: 2px solid rgba({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}, 0.25);
+          display: flex;
+          align-items: center;
+        }
+
+        .pill-main {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          width: 100%;
+          height: 100%;
+        }
+
+        .pill-art {
+          flex-shrink: 0;
+        }
+
+        .pill-cover {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%; /* round image inside pill */
+          object-fit: cover;
+          display: block;
+        }
+
+        .pill-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        .pill-song {
+          font-size: 20px;
+          font-weight: 600;
+          margin: 0;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          max-width: 100%;
+          background: linear-gradient(
+            125deg,
+            rgb({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}),
+            rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
+          );
+          background-size: 200% 100%;
+          -webkit-text-fill-color: transparent;
+          -webkit-background-clip: text;
+          animation: gradient 15s ease infinite;
+        }
+
+        .pill-artist {
+          font-size: 15px;
+          margin: 2px 0 6px 0;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          max-width: 100%;
+          background: linear-gradient(
+            -125deg,
+            rgb({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}),
+            rgb({{ songPalette[1][0] }}, {{ songPalette[1][1] }}, {{ songPalette[1][2] }})
+          );
+          background-size: 200% 100%;
+          -webkit-text-fill-color: transparent;
+          -webkit-background-clip: text;
+          animation: gradient 12s ease infinite;
+        }
+
+        #pill-bars {
+          display: flex;
+          justify-content: flex-start;
+          align-items: flex-end;
+          gap: 3px;
+          height: 18px;
+        }
+
+        .pill-bar {
+          width: 3px;
+          height: 6px;
+          border-radius: 2px;
+          background: linear-gradient(
+            90deg,
+            rgb({{ barPalette[0][0] }}, {{ barPalette[0][1] }}, {{ barPalette[0][2] }}) 0%,
+            rgb({{ barPalette[1][0] }}, {{ barPalette[1][1] }}, {{ barPalette[1][2] }}) 33%,
+            rgb({{ barPalette[2][0] }}, {{ barPalette[2][1] }}, {{ barPalette[2][2] }}) 66%,
+            rgb({{ barPalette[3][0] }}, {{ barPalette[3][1] }}, {{ barPalette[3][2] }}) 100%
+          );
+          background-size: 200% 100%;
+          animation: gradient 15s ease infinite, pulse 900ms ease-in-out infinite;
+          transform-origin: bottom;
+        }
+
+        @keyframes gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        @keyframes pulse {
+          0% { transform: scaleY(0.25); opacity: 0.4; }
+          50% { transform: scaleY(1); opacity: 1; }
+          100% { transform: scaleY(0.35); opacity: 0.6; }
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        div {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+
+        /* 📱 Mobile tweaks */
+        @media (max-width: 480px) {
+          .pill-cover {
+            width: 70px;
+            height: 70px;
+          }
+          .pill-song {
+            font-size: 18px;
+          }
+          .pill-artist {
+            font-size: 14px;
+          }
+          #pill-bars {
+            height: 16px;
+          }
+        }
+
+        {{barCSS|safe}}
+      </style>
+
+      <div class="pill-main">
+        <a class="pill-art" href="{}" target="_blank">
+          <img src="data:image/png;base64, {{image}}" class="pill-cover" />
+        </a>
+
+        <div class="pill-content">
+          <a href="{{songURI}}" target="_blank">
+            <div class="pill-song">{{songName}}</div>
+          </a>
+          <a href="{{artistURI}}" target="_blank">
+            <div class="pill-artist">{{artistName}}</div>
+          </a>
+          <div id="pill-bars">{{contentBar|safe}}</div>
+        </div>
+      </div>
+    </div>
+  </foreignObject>
+</svg>
