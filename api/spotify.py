@@ -32,6 +32,115 @@ RECENTLY_PLAYING_URL = (
 app = Flask(__name__)
 
 
+
+# … all your imports stay the same …
+
+def get(url):
+    global SPOTIFY_TOKEN
+
+    if (SPOTIFY_TOKEN == ""):
+        SPOTIFY_TOKEN = refreshToken()
+
+    response = requests.get(
+        url, headers={"Authorization": f"Bearer {SPOTIFY_TOKEN}"}
+    )
+
+    # Refresh token if unauthorized
+    if response.status_code == 401:
+        SPOTIFY_TOKEN = refreshToken()
+        response = requests.get(
+            url, headers={"Authorization": f"Bearer {SPOTIFY_TOKEN}"}
+        )
+
+    # Handle no content gracefully
+    if response.status_code in [204, 404]:
+        return None  # <-- changed from raising Exception
+    elif response.status_code != 200:
+        raise Exception(f"Spotify API returned {response.status_code}: {response.text}")
+
+    return response.json()
+
+
+def makeSVG(data, background_color, border_color):
+    barCount = 84
+    contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
+    barCSS = barGen(barCount)
+
+    # FIXED: Gracefully handle None or missing currently playing track
+    if not data or "item" not in data or data.get("is_playing") is False:
+        currentStatus = "Recently played:"
+        recentPlays = get(RECENTLY_PLAYING_URL)
+
+        # Ensure recentPlays has items
+        if recentPlays and "items" in recentPlays and len(recentPlays["items"]) > 0:
+            itemIndex = 0  # always take the latest played track
+            item = recentPlays["items"][itemIndex]["track"]
+        else:
+            # Fallback to placeholder
+            item = {
+                "album": {"images": []},
+                "artists": [{"name": "Unknown Artist", "external_urls": {"spotify": "#"}}],
+                "name": "No Song Found",
+                "external_urls": {"spotify": "#"}
+            }
+    else:
+        item = data["item"]
+        currentStatus = "Vibing to:"
+
+    if item["album"]["images"] == []:
+        image = PLACEHOLDER_IMAGE
+        barPalette = gradientGen(PLACEHOLDER_URL, 4)
+        songPalette = gradientGen(PLACEHOLDER_URL, 2)
+    else:
+        image = loadImageB64(item["album"]["images"][1]["url"])
+        barPalette = gradientGen(item["album"]["images"][1]["url"], 4)
+        songPalette = gradientGen(item["album"]["images"][1]["url"], 2)
+
+    artistName = item["artists"][0]["name"].replace("&", "&amp;")
+    songName = item["name"].replace("&", "&amp;")
+    songURI = item["external_urls"]["spotify"]
+    artistURI = item["artists"][0]["external_urls"]["spotify"]
+
+    dataDict = {
+        "contentBar": contentBar,
+        "barCSS": barCSS,
+        "artistName": artistName,
+        "songName": songName,
+        "songURI": songURI,
+        "artistURI": artistURI,
+        "image": image,
+        "status": currentStatus,
+        "background_color": background_color,
+        "border_color": border_color,
+        "barPalette": barPalette,
+        "songPalette": songPalette
+    }
+
+    return render_template(getTemplate(), **dataDict)
+
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+@app.route('/with_parameters')
+def catch_all(path):
+    background_color = request.args.get('background_color') or "181414"
+    border_color = request.args.get('border_color') or "181414"
+
+    # FIXED: Always try currently playing first, fallback safely
+    data = get(NOW_PLAYING_URL)
+    if not data:
+        data = get(RECENTLY_PLAYING_URL)
+
+    svg = makeSVG(data, background_color, border_color)
+
+    resp = Response(svg, mimetype="image/svg+xml")
+    resp.headers["Cache-Control"] = "s-maxage=1"
+
+    return resp
+
+
+
+
 def getAuth():
     return b64encode(f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_SECRET_ID}".encode()).decode(
         "ascii"
