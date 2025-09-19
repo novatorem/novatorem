@@ -44,16 +44,17 @@ def refreshToken():
         "refresh_token": SPOTIFY_REFRESH_TOKEN,
     }
 
-    headers = {"Authorization": "Basic {}".format(getAuth())}
-    response = requests.post(
-        REFRESH_TOKEN_URL, data=data, headers=headers).json()
+    headers = {"Authorization": f"Basic {getAuth()}"}
+    response = requests.post(REFRESH_TOKEN_URL, data=data, headers=headers)
 
-    try:
-        return response["access_token"]
-    except KeyError:
-        print(json.dumps(response))
-        print("\n---\n")
-        raise KeyError(str(response))
+    if response.status_code != 200:
+        print("Failed to refresh token:", response.text)
+        return None
+
+    tokens = response.json()
+    global SPOTIFY_TOKEN
+    SPOTIFY_TOKEN = tokens.get("access_token")
+    return SPOTIFY_TOKEN
 
 
 def get(url):
