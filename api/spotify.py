@@ -27,17 +27,10 @@ FALLBACK_THEME = "spotify.html.j2"
 REFRESH_TOKEN_URL = "https://accounts.spotify.com/api/token"
 NOW_PLAYING_URL = "https://api.spotify.com/v1/me/player/currently-playing"
 RECENTLY_PLAYING_URL = (
-    "https://api.spotify.com/v1/me/player/recently-played"
+    "https://api.spotify.com/v1/me/player/recently-played?limit=1"
 )
 
-# New fallback playlist URL
-FALLBACK_PLAYLIST_URL = "https://open.spotify.com/playlist/1kW0XCEDGIRvn3gjhxiwV8"
-
 app = Flask(__name__)
-
-# Global variable to cache the last track
-last_known_track = None
-last_known_track_id = None
 
 def getAuth():
     return b64encode(f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_SECRET_ID}".encode()).decode(
@@ -134,82 +127,39 @@ def loadImageB64(url):
         return PLACEHOLDER_IMAGE
 
 def makeSVG(data, background_color, border_color):
-    global last_known_track, last_known_track_id
-    
     barCount = 84
     barCSS = barGen(barCount)
     contentBar = ""
+
     item = None
     currentStatus = ""
 
-    # Step 1: Try to get the currently playing song
-    if data and "item" in data and data.get("is_playing"):
+    # Check for currently playing song
+    if data and "item" in data:
         item = data["item"]
         currentStatus = "Vibing to:"
+        # Set contentBar to show bars if a song is playing
         contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
-        
-        # Update cache with the new currently playing track
-        if item.get("id") != last_known_track_id:
-            last_known_track = item
-            last_known_track_id = item.get("id")
     else:
-        # Step 2: If nothing is playing, try to get the most recent track
+        # If not playing, get a random recently played track
+        currentStatus = "Recently played:"
         try:
-            recent_plays = get(RECENTLY_PLAYING_URL + "?limit=1")
-            
-            # Check if a new track is found in recently played
+            recent_plays = get(RECENTLY_PLAYING_URL + "?limit=50") # Fetch more tracks to get a better random choice
             if recent_plays and "items" in recent_plays and recent_plays["items"]:
-                most_recent_track = recent_plays["items"][0]["track"]
-                if most_recent_track.get("id") != last_known_track_id:
-                    item = most_recent_track
-                    last_known_track = item
-                    last_known_track_id = item.get("id")
-                    currentStatus = "Recently played:"
-                    contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
-                else:
-                    # If the most recent track is the same as the last one, use the cached track
-                    if last_known_track:
-                        item = last_known_track
-                        currentStatus = "Last played:"
-                        contentBar = "" # No bars if not playing
-                    else:
-                        item = None
-                        currentStatus = "No music playing"
-                        contentBar = ""
-            elif last_known_track:
-                # Fallback to cached track if no new recent play is found
-                item = last_known_track
-                currentStatus = "Last played:"
-                contentBar = ""
+                # Select a random track from the recently played list
+                random_play = random.choice(recent_plays["items"])
+                item = random_play["track"]
+                contentBar = "".join(["<div class='bar'></div>" for _ in range(barCount)])
             else:
-                # Step 3: All other options failed, try the fallback playlist
-                playlist_data = get(FALLBACK_PLAYLIST_URL)
-                if playlist_data and "tracks" in playlist_data and "items" in playlist_data["tracks"]:
-                    playlist_tracks = [track["track"] for track in playlist_data["tracks"]["items"]]
-                    if playlist_tracks:
-                        item = random.choice(playlist_tracks)
-                        currentStatus = "Featured playlist:"
-                        contentBar = "" # No bars for static playlist track
-                    else:
-                        item = None
-                        currentStatus = "No music playing"
-                        contentBar = ""
-                else:
-                    item = None
-                    currentStatus = "No music playing"
-                    contentBar = ""
-        except Exception as e:
-            print(f"Error fetching data: {e}")
-            if last_known_track:
-                item = last_known_track
-                currentStatus = "Last played:"
-                contentBar = ""
-            else:
-                item = None
+                # No recent plays available
                 currentStatus = "No music playing"
-                contentBar = ""
+                contentBar = "" # No bars if no music is found
+        except Exception as e:
+            print(f"Error fetching recently played data: {e}")
+            currentStatus = "No music playing"
+            contentBar = ""
             
-    # Process the selected item
+    # Process the selected item (either currently playing or recently played)
     if item:
         if item["album"]["images"] and len(item["album"]["images"]) > 1:
             image_url = item["album"]["images"][1]["url"]
@@ -261,6 +211,7 @@ def catch_all(path):
 
     data = None
     try:
+        # First, try to get the currently playing song
         data = get(NOW_PLAYING_URL)
     except Exception as e:
         print(f"Error fetching currently playing data: {e}")
