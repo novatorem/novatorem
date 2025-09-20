@@ -2,25 +2,26 @@
   <foreignObject width="480" height="133" preserveAspectRatio="xMidYMid meet">
     <div xmlns="http://www.w3.org/1999/xhtml" class="container">
       <style>
-        /* ✅ Glassmorphism card */
+        /* ✅ Glassmorphism pill-card */
         .container {
           width: 100%;
           height: 100%;
-          border-radius: 16px;
-          padding: 12px;
+          border-radius: 28px; /* more rounded for that pill card vibe */
+          padding: 16px 18px;
           box-sizing: border-box;
-          background: rgba({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}, 0.15); /* New tinted background */
-          backdrop-filter: blur(14px) saturate(180%);
-          -webkit-backdrop-filter: blur(14px) saturate(180%);
-          border: 2px solid rgba({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}, 0.15); /* New tinted border */
+          background: rgba({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}, 0.18);
+          backdrop-filter: blur(16px) saturate(180%);
+          -webkit-backdrop-filter: blur(16px) saturate(180%);
+          border: 1.6px solid rgba({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}, 0.25);
           display: flex;
           align-items: center;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.25); /* subtle depth */
         }
 
         .main {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 16px;
           width: 100%;
           height: 100%;
         }
@@ -30,9 +31,9 @@
         }
 
         .cover {
-          width: 100px;
-          height: 100px;
-          border-radius: 10px;
+          width: 96px;
+          height: 96px;
+          border-radius: 18px; /* softer corners */
           object-fit: cover;
           display: block;
         }
@@ -42,16 +43,14 @@
           display: flex;
           flex-direction: column;
           justify-content: center;
-          align-items: center;
-          text-align: center;
           overflow: hidden;
         }
 
         .song {
           font-size: 22px;
-          font-weight: 600;
+          font-weight: 700;
           margin-top: 2px;
-          margin-bottom: 2px;
+          margin-bottom: 4px;
           white-space: nowrap;
           text-overflow: ellipsis;
           overflow: hidden;
@@ -68,8 +67,8 @@
         }
 
         .artist {
-          font-size: 16px;
-          margin-bottom: 6px;
+          font-size: 15px;
+          margin-bottom: 8px;
           white-space: nowrap;
           text-overflow: ellipsis;
           overflow: hidden;
@@ -87,16 +86,16 @@
 
         #bars {
           display: flex;
-          justify-content: center;
+          justify-content: flex-start;
           align-items: flex-end;
-          gap: 3px;
-          height: 20px;
+          gap: 4px;
+          height: 22px;
         }
 
         .bar {
           width: 3px;
-          height: 6px;
-          border-radius: 2px;
+          height: 7px;
+          border-radius: 3px;
           background: linear-gradient(
             90deg,
             rgb({{ barPalette[0][0] }}, {{ barPalette[0][1] }}, {{ barPalette[0][2] }}) 0%,
@@ -130,22 +129,19 @@
         /* ✅ Mobile tweaks */
         @media (max-width: 480px) {
           .cover {
-            width: 100px;
-            height: 100px;
-          }
-          .content {
-            align-items: flex-start;
-            text-align: left;
+            width: 84px;
+            height: 84px;
+            border-radius: 14px;
           }
           .song {
             font-size: 20px;
           }
           .artist {
-            font-size: 15px;
+            font-size: 14px;
           }
           #bars {
-            justify-content: flex-start;
-            height: 18px;
+            height: 20px;
+            gap: 3px;
           }
         }
 
@@ -170,4 +166,3 @@
     </div>
   </foreignObject>
 </svg>
-
