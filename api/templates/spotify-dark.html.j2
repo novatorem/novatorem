@@ -31,9 +31,9 @@
         }
 
         .cover {
-          width: 96px;
-          height: 96px;
-          border-radius: 18px;
+          width: 106px;
+          height: 106px;
+          border-radius: 20px;
           object-fit: cover;
           display: block;
         }
@@ -47,7 +47,7 @@
         }
 
         .song {
-          font-size: 22px;
+          font-size: 24px;
           font-weight: 700;
           margin-top: 2px;
           margin-bottom: 4px;
@@ -67,7 +67,7 @@
         }
 
         .artist {
-          font-size: 15px;
+          font-size: 17px;
           margin-bottom: 6px;
           white-space: nowrap;
           text-overflow: ellipsis;
@@ -166,8 +166,7 @@
           <a href="{{artistURI}}" target="_blank">
             <div class="artist">{{artistName}}</div>
           </a>
-          <div id="bars">{{contentBar|safe}}</div> <!-- ✅ visible now -->
-        </div>
+          <div id="bars">{{contentBar|safe}}</div> </div>
       </div>
     </div>
   </foreignObject>
