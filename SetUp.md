@@ -8,7 +8,7 @@
   - `Client Secret`
 - Click on **Edit Settings**
 - In **Redirect URIs**:
-  - Add `http://localhost/callback/`
+  - Add `http://[::1]:8888/callback/`
 
 ## Refresh Token
 
@@ -22,14 +22,14 @@
 $ClientId = Read-Host "Client ID"
 $ClientSecret = Read-Host "Client Secret"
 
-Start-Process "https://accounts.spotify.com/authorize?client_id=$ClientId&response_type=code&scope=user-read-currently-playing,user-read-recently-played&redirect_uri=http://localhost/callback/"
+Start-Process "https://accounts.spotify.com/authorize?client_id=$ClientId&response_type=code&scope=user-read-currently-playing,user-read-recently-played&redirect_uri=http://[::1]:8888/callback"
 
-$Code = Read-Host "Please insert everything after 'https://localhost/callback/?code='"
+$Code = Read-Host "Please insert everything after 'https://[::1]:8888/callback/?code='"
 
 $ClientBytes = [System.Text.Encoding]::UTF8.GetBytes("${ClientId}:${ClientSecret}")
 $EncodedClientInfo =[Convert]::ToBase64String($ClientBytes)
 
-curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Basic $EncodedClientInfo" -d "grant_type=authorization_code&redirect_uri=http://localhost/callback/&code=$Code" https://accounts.spotify.com/api/token
+curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Basic $EncodedClientInfo" -d "grant_type=authorization_code&redirect_uri=http://[::1]:8888/callback/&code=$Code" https://accounts.spotify.com/api/token
 ```
 
 </details>
@@ -39,17 +39,17 @@ curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Authorizat
 - Navigate to the following URL:
 
 ```
-https://accounts.spotify.com/authorize?client_id={SPOTIFY_CLIENT_ID}&response_type=code&scope=user-read-currently-playing,user-read-recently-played&redirect_uri=http://localhost/callback/
+https://accounts.spotify.com/authorize?client_id={SPOTIFY_CLIENT_ID}&response_type=code&scope=user-read-currently-playing,user-read-recently-played&redirect_uri=http://[::1]:8888/callback
 ```
 
-- After logging in, save the {CODE} portion of: `http://localhost/callback/?code={CODE}`
+- After logging in, save the {CODE} portion of: `http://[::1]:8888/callback/?code={CODE}`
 
 - Create a string combining `{SPOTIFY_CLIENT_ID}:{SPOTIFY_CLIENT_SECRET}` (e.g. `5n7o4v5a3t7o5r2e3m1:5a8n7d3r4e2w5n8o2v3a7c5`) and **encode** into [Base64](https://base64.io/).
 
 - Then run a [curl command](https://httpie.org/run) in the form of:
 
 ```sh
-curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Basic {BASE64}" -d "grant_type=authorization_code&redirect_uri=http://localhost/callback/&code={CODE}" https://accounts.spotify.com/api/token
+curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Basic {BASE64}" -d "grant_type=authorization_code&redirect_uri=http://[::1]:8888/callback/&code={CODE}" https://accounts.spotify.com/api/token
 ```
 
 - Save the Refresh token
