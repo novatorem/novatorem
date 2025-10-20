@@ -1,23 +1,18 @@
 #Listening to...
-&nbsp;<div align="center">
+&nbsp;<div align="center"> Modified
     [![Spotify](https://spotify-ruby-tau.vercel.app/api/spotify)](https://open.spotify.com/user/31rzh7lcqbcfeulf7l2bheedtg7i)
 
    </div> 
    
-<div align="left">
- Slightly modified of the Original <br> <a href="https://github.com/novatorem/novatorem">Spotify now playing - Novatorem (OG🖤)</a>
-    
+&nbsp;<div align="center"> Original
+  [![Spotify](https://novatorem.vercel.app/api/spotify?background_color=0d1117&border_color=ffffff)](https://open.spotify.com/user/omnitenebris)
+</div>
+
+&nbsp;<div align="center">
+  [Fork](https://github.com/novatorem/novatorem/blob/main/SetUp.md) this [unlicensed](https://choosealicense.com/licenses/unlicense/) repository to recreate!<br><br>
+  [![Linkedin](https://img.shields.io/badge/linked-in-369?style=flat-square&logo=linkedin&logoColor=white&color=blue)](https://www.linkedin.com/in/andrew-novac)
+  [![E-Mail](https://img.shields.io/badge/email-reveal-2a8?style=flat-square&logo=gmail&logoColor=white)](https://mail.novac.dev/)
+  [![Visits](https://komarev.com/ghpvc/?username=novatorem&logo=GitHub&label=github%20visits&color=336699&logoColor=white&style=flat-square)](https://github.com/novatorem)
 </div>
 
 <br>
-
-modifications:
-
-<div align="left">
-   <ul>
-     <li>glassmorphism design (dark/light)</li>
-     <li>make the contentBar shows both desktop and mobile.</li>
-       <li>bg is glassmorpism, and the tint is getting from the album art.</li>
-       <li>content bar is slighlty changing colors like glitch mob</li>
-   </ul>
-</div>
