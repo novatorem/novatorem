@@ -1,57 +1,54 @@
-<svg viewBox="0 0 480 133" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-  <foreignObject width="480" height="133" preserveAspectRatio="xMidYMid meet">
-    <div xmlns="http://www.w3.org/1999/xhtml" class="container">
+<svg viewBox="0 0 480 120" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+  <foreignObject width="480" height="120" preserveAspectRatio="xMidYMid meet">
+    <div xmlns="http://www.w3.org/1999/xhtml" class="pill-container">
       <style>
-        /* ✅ Light Theme Glassmorphism card */
-        .container {
+        /* 🎵 Glass pill */
+        .pill-container {
           width: 100%;
           height: 100%;
-          border-radius: 16px;
-          padding: 12px;
+          border-radius: 60px; /* pill shape */
+          padding: 10px 16px;
           box-sizing: border-box;
-          background: rgba(255, 255, 255, 0.6);
+          background: rgba({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}, 0.15);
           backdrop-filter: blur(14px) saturate(180%);
           -webkit-backdrop-filter: blur(14px) saturate(180%);
-          border: 1px solid rgba(0, 0, 0, 0.08);
+          border: 2px solid rgba({{ songPalette[0][0] }}, {{ songPalette[0][1] }}, {{ songPalette[0][2] }}, 0.25);
           display: flex;
           align-items: center;
         }
 
-        .main {
+        .pill-main {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 14px;
           width: 100%;
           height: 100%;
         }
 
-        .art {
+        .pill-art {
           flex-shrink: 0;
         }
 
-        .cover {
-          width: 100px;
-          height: 100px;
-          border-radius: 10px;
+        .pill-cover {
+          width: 84px;
+          height: 84px;
+          border-radius: 50%;
           object-fit: cover;
           display: block;
         }
 
-        .content {
+        .pill-content {
           flex: 1;
           display: flex;
           flex-direction: column;
           justify-content: center;
-          align-items: center;
-          text-align: center;
           overflow: hidden;
         }
 
-        .song {
-          font-size: 22px;
-          font-weight: 600;
-          margin-top: 2px;
-          margin-bottom: 2px;
+        .pill-song {
+          font-size: 22px; /* bumped up */
+          font-weight: 700;
+          margin: 0 0 2px 0;
           white-space: nowrap;
           text-overflow: ellipsis;
           overflow: hidden;
@@ -67,9 +64,9 @@
           animation: gradient 15s ease infinite;
         }
 
-        .artist {
-          font-size: 16px;
-          margin-bottom: 6px;
+        .pill-artist {
+          font-size: 17px; /* bumped up */
+          margin: 0 0 6px 0;
           white-space: nowrap;
           text-overflow: ellipsis;
           overflow: hidden;
@@ -85,12 +82,14 @@
           animation: gradient 12s ease infinite;
         }
 
+        /* ✅ Bars more compact + lifted */
         #bars {
           display: flex;
-          justify-content: center;
+          justify-content: flex-start;
           align-items: flex-end;
           gap: 3px;
-          height: 20px;
+          height: 14px;   /* tighter */
+          margin-top: 2px; /* keeps a lil breathing space */
         }
 
         .bar {
@@ -127,42 +126,37 @@
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
 
-        /* ✅ Mobile tweaks */
+        /* 📱 Mobile tweaks */
         @media (max-width: 480px) {
-          .cover {
-            width: 100px;
-            height: 100px;
+          .pill-cover {
+            width: 72px;
+            height: 72px;
           }
-          .content {
-            align-items: flex-start;
-            text-align: left;
-          }
-          .song {
+          .pill-song {
             font-size: 20px;
           }
-          .artist {
-            font-size: 15px;
+          .pill-artist {
+            font-size: 16px;
           }
           #bars {
-            justify-content: flex-start;
-            height: 18px;
+            height: 12px;
           }
         }
 
         {{barCSS|safe}}
       </style>
 
-      <div class="main">
-        <a class="art" href="{}" target="_blank">
-          <img src="data:image/png;base64, {{image}}" class="cover" />
+      <div class="pill-main">
+        <a class="pill-art" href="{}" target="_blank">
+          <img src="data:image/png;base64, {{image}}" class="pill-cover" />
         </a>
 
-        <div class="content">
+        <div class="pill-content">
           <a href="{{songURI}}" target="_blank">
-            <div class="song">{{songName}}</div>
+            <div class="pill-song">{{songName}}</div>
           </a>
           <a href="{{artistURI}}" target="_blank">
-            <div class="artist">{{artistName}}</div>
+            <div class="pill-artist">{{artistName}}</div>
           </a>
           <div id="bars">{{contentBar|safe}}</div>
         </div>
