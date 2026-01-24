@@ -1,12 +1,18 @@
 version: '3.8'
+
 services:
-    spotify-readme:
-        env_file:
-            - .env
-        build: .
-        ports:
-            - "5000:5000"
-        volumes:
-            - ./api:/api
-volumes:
-  persistent:
+  now-playing:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./api:/api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
