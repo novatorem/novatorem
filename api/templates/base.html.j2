@@ -1,5 +1,10 @@
-<svg width="{{ width | default(480) }}" height="{{ height | default(133) }}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <foreignObject width="{{ width | default(480) }}" height="{{ height | default(133) }}">
+<svg 
+    viewBox="0 0 480 133" 
+    preserveAspectRatio="xMidYMid meet" 
+    style="width: 100%; height: auto; display: block; max-width: {{ width | default(480) }}px;"
+    xmlns="http://www.w3.org/2000/svg" 
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    <foreignObject width="480" height="133" x="0" y="0">
         <div xmlns="http://www.w3.org/1999/xhtml" class="container {% if use_blur_background %}blur-bg{% endif %} {% if blur_is_dark %}blur-dark{% else %}blur-light{% endif %}">
             <style>
                 :root {
@@ -125,6 +130,37 @@
                     gap: 12px;
                 }
 
+                /* Responsive scaling - adjust gap and padding */
+                @media (max-width: 768px) {
+                    .container {
+                        padding: 8px 12px;
+                    }
+                    
+                    .main {
+                        gap: 10px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .container {
+                        padding: 6px 10px;
+                    }
+                    
+                    .main {
+                        gap: 8px;
+                    }
+                }
+
+                @media (max-width: 320px) {
+                    .container {
+                        padding: 4px 8px;
+                    }
+                    
+                    .main {
+                        gap: 6px;
+                    }
+                }
+
                 .art {
                     flex-shrink: 0;
                     display: flex;
@@ -168,6 +204,33 @@
                     opacity: 0.8;
                 }
 
+                /* Responsive font sizes */
+                @media (max-width: 768px) {
+                    .song {
+                        font-size: 20px;
+                        max-width: 280px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .song {
+                        font-size: 18px;
+                        max-width: 100%;
+                    }
+                }
+
+                @media (max-width: 360px) {
+                    .song {
+                        font-size: 16px;
+                    }
+                }
+
+                @media (max-width: 320px) {
+                    .song {
+                        font-size: 14px;
+                    }
+                }
+
                 .artist {
                     width: 100%;
                     max-width: 330px;
@@ -191,12 +254,64 @@
                     opacity: 0.8;
                 }
 
+                /* Responsive font sizes */
+                @media (max-width: 768px) {
+                    .artist {
+                        font-size: 15px;
+                        max-width: 280px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .artist {
+                        font-size: 14px;
+                        max-width: 100%;
+                    }
+                }
+
+                @media (max-width: 360px) {
+                    .artist {
+                        font-size: 13px;
+                    }
+                }
+
+                @media (max-width: 320px) {
+                    .artist {
+                        font-size: 12px;
+                    }
+                }
+
                 .cover {
                     width: var(--album-size);
                     height: var(--album-size);
                     border-radius: var(--border-radius);
                     object-fit: cover;
                     transition: transform 0.2s ease, box-shadow 0.2s ease;
+                }
+
+                /* Responsive album size */
+                @media (max-width: 768px) {
+                    .cover {
+                        --album-size: 90px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .cover {
+                        --album-size: 80px;
+                    }
+                }
+
+                @media (max-width: 360px) {
+                    .cover {
+                        --album-size: 70px;
+                    }
+                }
+
+                @media (max-width: 320px) {
+                    .cover {
+                        --album-size: 60px;
+                    }
                 }
 
                 .container.blur-bg .cover {
@@ -216,6 +331,37 @@
                     margin-top: 6px;
                     width: 100%;
                     max-width: 330px;
+                }
+
+                /* Responsive bar container */
+                @media (max-width: 768px) {
+                    #bars {
+                        height: 22px;
+                        margin-top: 5px;
+                        max-width: 280px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    #bars {
+                        height: 20px;
+                        margin-top: 4px;
+                        max-width: 100%;
+                    }
+                }
+
+                @media (max-width: 360px) {
+                    #bars {
+                        height: 18px;
+                        margin-top: 3px;
+                    }
+                }
+
+                @media (max-width: 320px) {
+                    #bars {
+                        height: 16px;
+                        margin-top: 2px;
+                    }
                 }
 
                 .bar {
