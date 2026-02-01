@@ -1,18 +1,29 @@
 {
     "name": "novatorem",
-    "description": "Realtime profile Readme displaying currently playing song on Spotify using the Spotify API.",
+    "description": "Realtime profile Readme displaying currently playing song using Spotify or Last.fm API.",
     "scripts": {
-        "postdeploy": "gunicorn --workers=1 api.spotify:app"
+        "postdeploy": "gunicorn --workers=1 api.orchestrator:app"
     },
     "env": {
         "SPOTIFY_CLIENT_ID": {
-            "required": true
+            "description": "Spotify application client ID (required for Spotify)",
+            "required": false
         },
         "SPOTIFY_REFRESH_TOKEN": {
-            "required": true
+            "description": "Spotify OAuth refresh token (required for Spotify)",
+            "required": false
         },
         "SPOTIFY_SECRET_ID": {
-            "required": true
+            "description": "Spotify application client secret (required for Spotify)",
+            "required": false
+        },
+        "LAST_FM_API_KEY": {
+            "description": "Last.fm API key (required for Last.fm)",
+            "required": false
+        },
+        "LAST_FM_USERNAME": {
+            "description": "Last.fm username (required for Last.fm)",
+            "required": false
         }
     },
     "formation": {

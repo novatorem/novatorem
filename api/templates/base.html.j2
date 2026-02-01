@@ -1,0 +1,495 @@
+<svg 
+    viewBox="0 0 480 133" 
+    preserveAspectRatio="xMidYMid meet" 
+    style="width: 100%; height: auto; display: block; max-width: {{ width | default(480) }}px;"
+    xmlns="http://www.w3.org/2000/svg" 
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    <foreignObject width="480" height="133" x="0" y="0">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="container {% if use_blur_background %}blur-bg{% endif %} {% if blur_is_dark %}blur-dark{% else %}blur-light{% endif %}">
+            <style>
+                :root {
+                    --background-color: #{{ background_color }};
+                    --border-color: #{{ border_color }};
+                    --border-radius: {{ border_radius | default(5) }}px;
+                    --album-size: {{ album_size | default(100) }}px;
+                    --blur-amount: {{ blur_amount | default(20) }}px;
+                    --blur-overlay-opacity: {{ blur_overlay_opacity | default(0.7) }};
+                    
+                    /* Audio-reactive settings */
+                    --beat-duration: {{ beat_duration_ms | default(500) }}ms;
+                    --energy: {{ energy | default(0.5) }};
+                    --danceability: {{ danceability | default(0.5) }};
+                    
+                    /* Calculated animation values */
+                    --bar-max-height: {{ (15 + (energy | default(0.5)) * 8) | int }}px;
+                    --bar-min-height: {{ (2 + (energy | default(0.5)) * 2) | int }}px;
+                    --glow-intensity: {{ (energy | default(0.5)) * 0.6 }};
+                    
+                    /* Palette colors */
+                    --song-color-1: rgb({{ song_palette[0][0] }}, {{ song_palette[0][1] }}, {{ song_palette[0][2] }});
+                    --song-color-2: rgb({{ song_palette[1][0] }}, {{ song_palette[1][1] }}, {{ song_palette[1][2] }});
+                    --bar-color-1: rgb({{ bar_palette[0][0] }}, {{ bar_palette[0][1] }}, {{ bar_palette[0][2] }});
+                    --bar-color-2: rgb({{ bar_palette[1][0] }}, {{ bar_palette[1][1] }}, {{ bar_palette[1][2] }});
+                    --bar-color-3: rgb({{ bar_palette[2][0] }}, {{ bar_palette[2][1] }}, {{ bar_palette[2][2] }});
+                    --bar-color-4: rgb({{ bar_palette[3][0] }}, {{ bar_palette[3][1] }}, {{ bar_palette[3][2] }});
+                    --bar-glow: rgba({{ bar_palette[1][0] }}, {{ bar_palette[1][1] }}, {{ bar_palette[1][2] }}, var(--glow-intensity));
+                }
+
+                * {
+                    box-sizing: border-box;
+                    margin: 0;
+                    padding: 0;
+                }
+
+                .container {
+                    position: relative;
+                    border-radius: var(--border-radius);
+                    padding: 10px 15px;
+                    overflow: hidden;
+                    {% block container_styles %}
+                    background-color: var(--background-color);
+                    border: 1px solid var(--border-color);
+                    {% endblock %}
+                }
+
+                /* Blurred background styles */
+                .container.blur-bg {
+                    background: transparent;
+                    border: 1px solid var(--border-color);
+                }
+
+                .blur-background {
+                    display: none;
+                }
+
+                .container.blur-bg .blur-background {
+                    display: block;
+                    position: absolute;
+                    top: -20px;
+                    left: -20px;
+                    right: -20px;
+                    bottom: -20px;
+                    z-index: -2;
+                    background-image: url("data:image/png;base64,{{ image }}");
+                    background-size: cover;
+                    background-position: center;
+                    filter: blur(var(--blur-amount)) saturate(1.2);
+                    transform: scale(1.1);
+                }
+
+                .blur-overlay {
+                    display: none;
+                }
+
+                .container.blur-bg .blur-overlay {
+                    display: block;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    z-index: -1;
+                    border-radius: var(--border-radius);
+                }
+
+                .container.blur-bg.blur-dark .blur-overlay {
+                    background: rgba(0, 0, 0, var(--blur-overlay-opacity));
+                }
+
+                .container.blur-bg.blur-light .blur-overlay {
+                    background: rgba(255, 255, 255, var(--blur-overlay-opacity));
+                }
+
+                /* Text color adjustments for blur backgrounds */
+                .container.blur-bg.blur-dark .song,
+                .container.blur-bg.blur-dark .artist,
+                .container.blur-bg.blur-dark .status {
+                    background: linear-gradient(125deg, #ffffff, #e0e0e0);
+                    background-size: 200% 100%;
+                    -webkit-text-fill-color: transparent;
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                }
+
+                .container.blur-bg.blur-light .song,
+                .container.blur-bg.blur-light .artist,
+                .container.blur-bg.blur-light .status {
+                    background: linear-gradient(125deg, #1a1a1a, #333333);
+                    background-size: 200% 100%;
+                    -webkit-text-fill-color: transparent;
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                }
+
+                .main {
+                    position: relative;
+                    z-index: 1;
+                    display: flex;
+                    align-items: center;
+                    height: 100%;
+                    gap: 12px;
+                }
+
+                /* Responsive scaling - adjust gap and padding */
+                @media (max-width: 768px) {
+                    .container {
+                        padding: 8px 12px;
+                    }
+                    
+                    .main {
+                        gap: 10px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .container {
+                        padding: 6px 10px;
+                    }
+                    
+                    .main {
+                        gap: 8px;
+                    }
+                }
+
+                @media (max-width: 320px) {
+                    .container {
+                        padding: 4px 8px;
+                    }
+                    
+                    .main {
+                        gap: 6px;
+                    }
+                }
+
+                .art {
+                    flex-shrink: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+
+                .art:hover .cover {
+                    transform: scale(1.02);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                }
+
+                .content {
+                    flex: 1;
+                    min-width: 0;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .song {
+                    width: 100%;
+                    max-width: 330px;
+                    overflow: hidden;
+                    font-size: 22px;
+                    font-weight: 500;
+                    text-align: center;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    background: linear-gradient(125deg, var(--song-color-1), var(--song-color-2));
+                    background-size: 200% 100%;
+                    background-position: 0% 50%;
+                    -webkit-text-fill-color: transparent;
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    animation: gradient 15s ease infinite;
+                    transition: opacity 0.2s ease;
+                }
+
+                .song:hover {
+                    opacity: 0.8;
+                }
+
+                /* Responsive font sizes */
+                @media (max-width: 768px) {
+                    .song {
+                        font-size: 20px;
+                        max-width: 280px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .song {
+                        font-size: 18px;
+                        max-width: 100%;
+                    }
+                }
+
+                @media (max-width: 360px) {
+                    .song {
+                        font-size: 16px;
+                    }
+                }
+
+                @media (max-width: 320px) {
+                    .song {
+                        font-size: 14px;
+                    }
+                }
+
+                .artist {
+                    width: 100%;
+                    max-width: 330px;
+                    font-size: 16px;
+                    margin-top: 4px;
+                    text-align: center;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    background: linear-gradient(-125deg, var(--song-color-1), var(--song-color-2));
+                    background-size: 200% 100%;
+                    background-position: 0% 50%;
+                    -webkit-text-fill-color: transparent;
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    animation: gradient 12s ease infinite;
+                    transition: opacity 0.2s ease;
+                }
+
+                .artist:hover {
+                    opacity: 0.8;
+                }
+
+                /* Responsive font sizes */
+                @media (max-width: 768px) {
+                    .artist {
+                        font-size: 15px;
+                        max-width: 280px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .artist {
+                        font-size: 14px;
+                        max-width: 100%;
+                    }
+                }
+
+                @media (max-width: 360px) {
+                    .artist {
+                        font-size: 13px;
+                    }
+                }
+
+                @media (max-width: 320px) {
+                    .artist {
+                        font-size: 12px;
+                    }
+                }
+
+                .cover {
+                    width: var(--album-size);
+                    height: var(--album-size);
+                    border-radius: var(--border-radius);
+                    object-fit: cover;
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                }
+
+                /* Responsive album size */
+                @media (max-width: 768px) {
+                    .cover {
+                        --album-size: 90px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .cover {
+                        --album-size: 80px;
+                    }
+                }
+
+                @media (max-width: 360px) {
+                    .cover {
+                        --album-size: 70px;
+                    }
+                }
+
+                @media (max-width: 320px) {
+                    .cover {
+                        --album-size: 60px;
+                    }
+                }
+
+                .container.blur-bg .cover {
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+                }
+                
+                /* Add glow effect to album art matching the palette */
+                .container.blur-bg.blur-dark .cover {
+                    box-shadow: 
+                        0 4px 15px rgba(0, 0, 0, 0.4),
+                        0 0 20px var(--bar-glow);
+                }
+
+                #bars {
+                    position: relative;
+                    height: 25px;
+                    margin-top: 6px;
+                    width: 100%;
+                    max-width: 330px;
+                }
+
+                /* Responsive bar container */
+                @media (max-width: 768px) {
+                    #bars {
+                        height: 22px;
+                        margin-top: 5px;
+                        max-width: 280px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    #bars {
+                        height: 20px;
+                        margin-top: 4px;
+                        max-width: 100%;
+                    }
+                }
+
+                @media (max-width: 360px) {
+                    #bars {
+                        height: 18px;
+                        margin-top: 3px;
+                    }
+                }
+
+                @media (max-width: 320px) {
+                    #bars {
+                        height: 16px;
+                        margin-top: 2px;
+                    }
+                }
+
+                .bar {
+                    width: 3px;
+                    bottom: 0;
+                    height: var(--bar-max-height);
+                    position: absolute;
+                    border-radius: 2px 2px 0 0;
+                    background: linear-gradient(
+                        180deg,
+                        var(--bar-color-2) 0%,
+                        var(--bar-color-1) 50%,
+                        var(--bar-color-3) 100%
+                    );
+                    box-shadow: 0 0 4px var(--bar-glow), 0 0 8px var(--bar-glow);
+                    animation: 
+                        gradient 15s ease infinite, 
+                        pulse var(--beat-duration) ease-in-out infinite alternate,
+                        glow calc(var(--beat-duration) * 2) ease-in-out infinite;
+                    transform-origin: bottom center;
+                }
+
+                /* Wave pattern - every 3rd bar slightly different timing */
+                .bar:nth-child(3n) {
+                    animation-delay: calc(var(--beat-duration) * -0.33), calc(var(--beat-duration) * -0.33), calc(var(--beat-duration) * -0.66);
+                }
+                
+                .bar:nth-child(3n+1) {
+                    animation-delay: calc(var(--beat-duration) * -0.66), calc(var(--beat-duration) * -0.66), 0s;
+                }
+
+                /* Brighter bars and stronger glow for blur background */
+                .container.blur-bg.blur-dark .bar {
+                    filter: brightness(1.3);
+                    box-shadow: 0 0 6px var(--bar-glow), 0 0 12px var(--bar-glow);
+                }
+                
+                .container.blur-bg.blur-light .bar {
+                    filter: saturate(1.2);
+                }
+
+                .status {
+                    font-size: 12px;
+                    text-align: center;
+                    margin-bottom: 4px;
+                    opacity: 0.7;
+                    background: linear-gradient(-125deg, var(--song-color-1), var(--song-color-2));
+                    background-size: 200% 100%;
+                    -webkit-text-fill-color: transparent;
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    animation: gradient 17s ease infinite;
+                }
+
+                a {
+                    text-decoration: none;
+                    display: block;
+                }
+
+                div {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+                }
+
+                @keyframes gradient {
+                    0% {
+                        background-position: 0% 50%;
+                    }
+                    50% {
+                        background-position: 100% 50%;
+                    }
+                    100% {
+                        background-position: 0% 50%;
+                    }
+                }
+
+                @keyframes pulse {
+                    0% {
+                        height: var(--bar-min-height);
+                        opacity: 0.4;
+                        transform: scaleY(0.3);
+                    }
+                    50% {
+                        opacity: 0.85;
+                    }
+                    100% {
+                        height: var(--bar-max-height);
+                        opacity: 1;
+                        transform: scaleY(1);
+                    }
+                }
+                
+                @keyframes glow {
+                    0%, 100% {
+                        filter: brightness(1);
+                    }
+                    50% {
+                        filter: brightness(1.2);
+                    }
+                }
+
+                {% block theme_styles %}{% endblock %}
+
+                {{ bar_css | safe }}
+            </style>
+
+            <!-- Blurred background layer -->
+            <div class="blur-background"></div>
+            <div class="blur-overlay"></div>
+
+            <div class="main">
+                <a class="art" href="{{ song_uri }}" target="_blank" title="Open in {{ service_name | default('music app') }}">
+                    <img src="data:image/png;base64,{{ image }}" class="cover" alt="Album art" />
+                </a>
+
+                <div class="content">
+                    {% if show_status %}
+                    <div class="status">{{ status }}</div>
+                    {% endif %}
+                    <a href="{{ song_uri }}" target="_blank">
+                        <div class="song" title="{{ song_name }}">{{ song_name }}</div>
+                    </a>
+                    <a href="{{ artist_uri }}" target="_blank">
+                        <div class="artist" title="{{ artist_name }}">{{ artist_name }}</div>
+                    </a>
+                    <div id="bars">{{ content_bar | safe }}</div>
+                </div>
+            </div>
+
+        </div>
+    </foreignObject>
+</svg>
