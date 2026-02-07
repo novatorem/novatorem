@@ -6,6 +6,7 @@ Abstracts away the core functionality from the music service providers (Spotify,
 
 from __future__ import annotations
 
+import colorsys
 import json
 import os
 import random
@@ -13,13 +14,15 @@ from io import BytesIO
 from typing import Any, Optional, Tuple
 
 import requests
+import urllib3
 from base64 import b64encode
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from colorthief import ColorThief
 from flask import Flask, Response, render_template, request
 
 from .config import (
     ColorPalette,
-    RGBColor,
     svg_config,
     template_config,
     validate_background_type,
@@ -57,7 +60,7 @@ class ImageData:
         """Fetch image bytes from URL."""
         if self._bytes is None:
             try:
-                response = requests.get(self.url, timeout=10)
+                response = requests.get(self.url, timeout=10, verify=False)
                 response.raise_for_status()
                 self._bytes = response.content
             except requests.RequestException as e:
@@ -132,6 +135,35 @@ def load_image_with_fallback(url: str) -> Tuple[str, ColorPalette, ColorPalette]
     )
 
 
+def normalize_text_palette(
+    palette: ColorPalette,
+    min_l: float = 0.35,
+    max_l: float = 0.75,
+) -> ColorPalette:
+    """
+    Compress the brightness range of a text colour palette.
+
+    Clamps the HSL lightness of each colour to [min_l, max_l] while
+    preserving hue and saturation, so the lightest and darkest points
+    stay readable without extreme contrast.
+
+    Args:
+        palette: List of RGB tuples
+        min_l: Minimum lightness (0-1)
+        max_l: Maximum lightness (0-1)
+
+    Returns:
+        Adjusted palette with clamped lightness
+    """
+    result: ColorPalette = []
+    for r, g, b in palette:
+        h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
+        l = max(min_l, min(max_l, l))
+        rn, gn, bn = colorsys.hls_to_rgb(h, l, s)
+        result.append((int(rn * 255), int(gn * 255), int(bn * 255)))
+    return result
+
+
 # ============================================================================
 # SVG Generation
 # ============================================================================
@@ -141,62 +173,66 @@ def generate_bar_css(
     bar_count: int,
     beat_duration_ms: int = 500,
     energy: float = 0.5,
-    danceability: float = 0.5,
+    bar_palette: Optional[list] = None,
 ) -> str:
     """
     Generate CSS for the equalizer bars animation, synced to BPM.
-    
+
+    Bars share a wide linear gradient (built from the palette) that
+    animates left-to-right via ``background-position``. Each bar gets
+    a staggered ``animation-delay`` so the colour wave flows spatially
+    across the bar row.
+
     Args:
         bar_count: Number of equalizer bars to generate
         beat_duration_ms: Duration of one beat in milliseconds
         energy: Track energy (0-1), affects animation intensity
-        danceability: Track danceability (0-1), affects animation smoothness
-        
+        bar_palette: List of RGB tuples for bar colors
+
     Returns:
-        CSS string for bar positioning and animation
+        CSS string for shared gradient, glow, and per-bar animation timing
     """
     css_rules: list[str] = []
-    
-    # Calculate total width and center offset
-    total_width = bar_count * svg_config.bar_spacing
-    container_width = 330  # max-width of content area
-    start_offset = max(0, (container_width - total_width) // 2)
-    left = start_offset
+    palette = bar_palette or svg_config.default_bar_palette
 
-    # Scale animation based on energy (more energy = faster, more dramatic)
-    energy_factor = 0.5 + (energy * 0.5)  # 0.5 to 1.0
-    
-    # Danceability affects the animation curve (more danceable = bouncier)
-    bounce_factor = 0.3 + (danceability * 0.7)  # 0.3 to 1.0
+    # Use the palette directly — repeat the first colour at the end
+    # so the gradient loops seamlessly when the animation wraps.
+    looped = list(palette) + [palette[0]]
+    stops = ", ".join(f"rgb({r},{g},{b})" for r, g, b in looped)
+
+    # Make the gradient wide enough that each bar's visible slice looks
+    # like a solid colour.  With background-size = bar_count * 100 %,
+    # each bar shows ≈ 1/bar_count of the gradient at any moment.
+    bg_size = bar_count * 100
+
+    css_rules.append(
+        f".bar {{ "
+        f"background: linear-gradient(90deg, {stops}); "
+        f"background-size: {bg_size}% 100%; "
+        f"}}"
+    )
+
+    # --- per-bar animation timing ---
+    energy_factor = 0.5 + (energy * 0.5)
+    wave_duration_ms = 45000  # very slow colour drift across the row
 
     for i in range(1, bar_count + 1):
-        # Base animation on beat duration with variation
-        # Add slight randomness but keep it roughly on beat
-        beat_variance = random.uniform(0.8, 1.2)
-        anim_duration = int(beat_duration_ms * beat_variance * (2 - energy_factor))
-        
-        # Clamp to reasonable range
-        anim_duration = max(200, min(anim_duration, 1500))
+        # Pulse timing (slight per-bar variation)
+        beat_variance = random.uniform(0.9, 1.1)
+        pulse_dur = int(beat_duration_ms * beat_variance * (2 - energy_factor))
+        pulse_dur = max(200, min(pulse_dur, 1500))
+        pulse_delay = int((i / bar_count) * beat_duration_ms * 0.5)
 
-        # Create cubic-bezier based on danceability
-        # Higher danceability = more bouncy (overshoot) curves
-        x1 = random.uniform(0.1, 0.4)
-        y1 = random.uniform(0.0, bounce_factor * 1.5)  # Overshoot based on danceability
-        x2 = random.uniform(0.4, 0.8)
-        y2 = random.uniform(0.8, 1.0 + bounce_factor * 0.5)
-
-        # Add phase offset based on position (creates wave effect)
-        phase_delay = int((i / bar_count) * beat_duration_ms * 0.5)
+        # Colour-wave delay: spread one full cycle across all bars
+        # so adjacent bars show neighbouring slices of the gradient
+        wave_delay = int((i - 1) / bar_count * wave_duration_ms)
 
         css_rules.append(
             f".bar:nth-child({i}) {{ "
-            f"left: {left}px; "
-            f"animation-duration: 15s, {anim_duration}ms; "
-            f"animation-delay: 0s, -{phase_delay}ms; "
-            f"animation-timing-function: ease, cubic-bezier({x1:.4f},{y1:.4f},{x2:.4f},{y2:.4f}); "
+            f"animation-duration: {pulse_dur}ms, {wave_duration_ms}ms; "
+            f"animation-delay: -{pulse_delay}ms, -{wave_delay}ms; "
             f"}}"
         )
-        left += svg_config.bar_spacing
 
     return "\n".join(css_rules)
 
@@ -244,6 +280,33 @@ def escape_xml(text: str) -> str:
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
+def calculate_marquee(text: str, font_size: int, container_width: int = 330) -> dict:
+    """
+    Calculate marquee scroll parameters if text overflows its container.
+
+    Uses the standard streaming-app ticker pattern: the text is duplicated
+    and scrolls continuously left.  A brief pause at the start of each
+    cycle lets the viewer read the beginning.
+
+    The scroll distance is computed in pixels (not %) so the animation
+    can use ``margin-left`` — a layout property the browser cannot cull.
+
+    Args:
+        text: The raw (unescaped) display text
+        font_size: CSS font-size in px
+        container_width: Available width in px (matches CSS max-width)
+
+    Returns:
+        Dict with 'enabled', and when True: 'duration' (s) and
+        'scroll_px' (px) for one copy + spacer.
+    """
+    estimated_width = len(text) * font_size * 0.55
+    if estimated_width <= container_width:
+        return {"enabled": False}
+    duration = round(max(6, len(text) * 0.22), 1)
+    return {"enabled": True, "duration": duration}
+
+
 def make_svg(
     track_data: dict[str, Any],
     background_color: str,
@@ -278,25 +341,35 @@ def make_svg(
     audio_features = track_data.get("audio_features") or {}
     tempo = audio_features.get("tempo", svg_config.default_tempo)
     energy = audio_features.get("energy", svg_config.default_energy)
-    danceability = audio_features.get("danceability", svg_config.default_danceability)
 
     # Calculate beat duration from BPM
     beat_duration_ms = int(60000 / tempo) if tempo > 0 else 500
 
-    # Generate bar CSS with audio features
-    bar_css = generate_bar_css(bar_count, beat_duration_ms, energy, danceability)
+    # Load image and extract colors first (needed for per-bar colors)
+    album_art_url = track_data.get("album_art_url", "")
+    image, bar_palette, song_palette = load_image_with_fallback(album_art_url)
+
+    # Compress brightness so the gradient stays readable and bars aren't
+    # too dark or washed out
+    song_palette = normalize_text_palette(song_palette)
+    bar_palette = normalize_text_palette(bar_palette, min_l=0.3, max_l=0.7)
+
+    # Generate bar CSS with audio features and per-bar colors
+    bar_css = generate_bar_css(bar_count, beat_duration_ms, energy, bar_palette)
 
     # Set status text based on playing state
     is_playing = track_data.get("is_playing", False)
     status = "Vibing to:" if is_playing else "Recently played:"
 
-    # Load image and extract colors (with caching)
-    album_art_url = track_data.get("album_art_url", "")
-    image, bar_palette, song_palette = load_image_with_fallback(album_art_url)
+    # Calculate marquee params from raw text (before XML escaping)
+    raw_song = track_data.get("track_name", "Unknown Track")
+    raw_artist = track_data.get("artist_name", "Unknown Artist")
+    song_marquee = calculate_marquee(raw_song, 22)
+    artist_marquee = calculate_marquee(raw_artist, 16)
 
     # Escape text for XML
-    artist_name = escape_xml(track_data.get("artist_name", "Unknown Artist"))
-    song_name = escape_xml(track_data.get("track_name", "Unknown Track"))
+    artist_name = escape_xml(raw_artist)
+    song_name = escape_xml(raw_song)
 
     # Determine background mode
     use_blur_background = background_type in ("blur_dark", "blur_light")
@@ -307,10 +380,8 @@ def make_svg(
         "content_bar": content_bar,
         "bar_css": bar_css,
         # Audio features for template
-        "tempo": tempo,
         "beat_duration_ms": beat_duration_ms,
         "energy": energy,
-        "danceability": danceability,
         # Track info
         "artist_name": artist_name,
         "song_name": song_name,
@@ -338,6 +409,9 @@ def make_svg(
         "height": svg_config.height,
         "album_size": svg_config.album_art_size,
         "border_radius": svg_config.border_radius,
+        # Marquee
+        "song_marquee": song_marquee,
+        "artist_marquee": artist_marquee,
     }
 
     return render_template(get_template_name(), **template_data)

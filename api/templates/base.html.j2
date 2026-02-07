@@ -1,10 +1,10 @@
 <svg 
-    viewBox="0 0 480 133" 
+    viewBox="0 0 {{ width | default(480) }} {{ height | default(135) }}" 
     preserveAspectRatio="xMidYMid meet" 
     style="width: 100%; height: auto; display: block; max-width: {{ width | default(480) }}px;"
     xmlns="http://www.w3.org/2000/svg" 
     xmlns:xlink="http://www.w3.org/1999/xlink">
-    <foreignObject width="480" height="133" x="0" y="0">
+    <foreignObject width="{{ width | default(480) }}" height="{{ height | default(135) }}" x="0" y="0">
         <div xmlns="http://www.w3.org/1999/xhtml" class="container {% if use_blur_background %}blur-bg{% endif %} {% if blur_is_dark %}blur-dark{% else %}blur-light{% endif %}">
             <style>
                 :root {
@@ -17,21 +17,15 @@
                     
                     /* Audio-reactive settings */
                     --beat-duration: {{ beat_duration_ms | default(500) }}ms;
-                    --energy: {{ energy | default(0.5) }};
-                    --danceability: {{ danceability | default(0.5) }};
                     
                     /* Calculated animation values */
                     --bar-max-height: {{ (15 + (energy | default(0.5)) * 8) | int }}px;
-                    --bar-min-height: {{ (2 + (energy | default(0.5)) * 2) | int }}px;
                     --glow-intensity: {{ (energy | default(0.5)) * 0.6 }};
                     
                     /* Palette colors */
                     --song-color-1: rgb({{ song_palette[0][0] }}, {{ song_palette[0][1] }}, {{ song_palette[0][2] }});
                     --song-color-2: rgb({{ song_palette[1][0] }}, {{ song_palette[1][1] }}, {{ song_palette[1][2] }});
                     --bar-color-1: rgb({{ bar_palette[0][0] }}, {{ bar_palette[0][1] }}, {{ bar_palette[0][2] }});
-                    --bar-color-2: rgb({{ bar_palette[1][0] }}, {{ bar_palette[1][1] }}, {{ bar_palette[1][2] }});
-                    --bar-color-3: rgb({{ bar_palette[2][0] }}, {{ bar_palette[2][1] }}, {{ bar_palette[2][2] }});
-                    --bar-color-4: rgb({{ bar_palette[3][0] }}, {{ bar_palette[3][1] }}, {{ bar_palette[3][2] }});
                     --bar-glow: rgba({{ bar_palette[1][0] }}, {{ bar_palette[1][1] }}, {{ bar_palette[1][2] }}, var(--glow-intensity));
                 }
 
@@ -44,7 +38,7 @@
                 .container {
                     position: relative;
                     border-radius: var(--border-radius);
-                    padding: 10px 15px;
+                    padding: 15px;
                     overflow: hidden;
                     {% block container_styles %}
                     background-color: var(--background-color);
@@ -100,25 +94,20 @@
                     background: rgba(255, 255, 255, var(--blur-overlay-opacity));
                 }
 
-                /* Text color adjustments for blur backgrounds */
-                .container.blur-bg.blur-dark .song,
-                .container.blur-bg.blur-dark .artist,
+                /* Text shadow for blur backgrounds (keeps default gradient colors) */
+                .container.blur-bg.blur-dark .song-text,
+                .container.blur-bg.blur-dark .artist-text,
                 .container.blur-bg.blur-dark .status {
-                    background: linear-gradient(125deg, #ffffff, #e0e0e0);
-                    background-size: 200% 100%;
-                    -webkit-text-fill-color: transparent;
-                    -webkit-background-clip: text;
-                    background-clip: text;
+                    filter: drop-shadow(0 0 1px rgba(0,0,0,0.9))
+                            drop-shadow(0 0 3px rgba(0,0,0,0.6));
                 }
 
-                .container.blur-bg.blur-light .song,
-                .container.blur-bg.blur-light .artist,
+                .container.blur-bg.blur-light .song-text,
+                .container.blur-bg.blur-light .artist-text,
                 .container.blur-bg.blur-light .status {
-                    background: linear-gradient(125deg, #1a1a1a, #333333);
-                    background-size: 200% 100%;
-                    -webkit-text-fill-color: transparent;
-                    -webkit-background-clip: text;
-                    background-clip: text;
+                    filter: brightness(0.55)
+                            drop-shadow(0 0 1px rgba(255,255,255,0.9))
+                            drop-shadow(0 0 3px rgba(255,255,255,0.5));
                 }
 
                 .main {
@@ -133,7 +122,7 @@
                 /* Responsive scaling - adjust gap and padding */
                 @media (max-width: 768px) {
                     .container {
-                        padding: 8px 12px;
+                        padding: 12px;
                     }
                     
                     .main {
@@ -143,7 +132,7 @@
 
                 @media (max-width: 480px) {
                     .container {
-                        padding: 6px 10px;
+                        padding: 10px;
                     }
                     
                     .main {
@@ -153,7 +142,7 @@
 
                 @media (max-width: 320px) {
                     .container {
-                        padding: 4px 8px;
+                        padding: 8px;
                     }
                     
                     .main {
@@ -176,20 +165,36 @@
                 .content {
                     flex: 1;
                     min-width: 0;
+                    overflow: hidden;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                 }
 
-                .song {
+                /* --- Song / Artist clip containers --- */
+                .song, .artist {
+                    position: relative;
                     width: 100%;
                     max-width: 330px;
                     overflow: hidden;
+                    text-align: center;
+                }
+
+                .song.has-marquee,
+                .artist.has-marquee {
+                    text-align: left;
+                }
+
+                .artist {
+                    margin-top: 4px;
+                }
+
+                /* --- Inner text spans (carry gradient + scroll) --- */
+                .song-text {
+                    display: inline-block;
+                    white-space: nowrap;
                     font-size: 22px;
                     font-weight: 500;
-                    text-align: center;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
                     background: linear-gradient(125deg, var(--song-color-1), var(--song-color-2));
                     background-size: 200% 100%;
                     background-position: 0% 50%;
@@ -198,48 +203,14 @@
                     background-clip: text;
                     animation: gradient 15s ease infinite;
                     transition: opacity 0.2s ease;
+                    filter: drop-shadow(0 0 1px rgba(0,0,0,0.8))
+                            drop-shadow(0 0 2px rgba(0,0,0,0.5));
                 }
 
-                .song:hover {
-                    opacity: 0.8;
-                }
-
-                /* Responsive font sizes */
-                @media (max-width: 768px) {
-                    .song {
-                        font-size: 20px;
-                        max-width: 280px;
-                    }
-                }
-
-                @media (max-width: 480px) {
-                    .song {
-                        font-size: 18px;
-                        max-width: 100%;
-                    }
-                }
-
-                @media (max-width: 360px) {
-                    .song {
-                        font-size: 16px;
-                    }
-                }
-
-                @media (max-width: 320px) {
-                    .song {
-                        font-size: 14px;
-                    }
-                }
-
-                .artist {
-                    width: 100%;
-                    max-width: 330px;
-                    font-size: 16px;
-                    margin-top: 4px;
-                    text-align: center;
-                    overflow: hidden;
+                .artist-text {
+                    display: inline-block;
                     white-space: nowrap;
-                    text-overflow: ellipsis;
+                    font-size: 16px;
                     background: linear-gradient(-125deg, var(--song-color-1), var(--song-color-2));
                     background-size: 200% 100%;
                     background-position: 0% 50%;
@@ -248,37 +219,68 @@
                     background-clip: text;
                     animation: gradient 12s ease infinite;
                     transition: opacity 0.2s ease;
+                    filter: drop-shadow(0 0 1px rgba(0,0,0,0.8))
+                            drop-shadow(0 0 2px rgba(0,0,0,0.5));
                 }
 
-                .artist:hover {
+                .song:hover .song-text,
+                .artist:hover .artist-text {
                     opacity: 0.8;
+                }
+
+                /* --- Marquee: continuous ticker ---
+                   translateX(-50%) gives pixel-perfect loop alignment.
+                   The tiny margin-left change keeps the layout engine
+                   engaged so the browser cannot cull off-screen content
+                   in SVG foreignObject. */
+                .marquee-track {
+                    display: inline-block;
+                    white-space: nowrap;
+                    animation: marquee var(--scroll-duration) linear infinite;
+                }
+
+                .has-marquee .song-text,
+                .has-marquee .artist-text {
+                    filter: none;
+                }
+
+                .marquee-spacer {
+                    display: inline-block;
+                    width: 60px;
+                }
+
+                @keyframes marquee {
+                    0%, 10% {
+                        margin-left: 0;
+                        transform: translateX(0);
+                    }
+                    100% {
+                        margin-left: -1px;
+                        transform: translateX(-50%);
+                    }
                 }
 
                 /* Responsive font sizes */
                 @media (max-width: 768px) {
-                    .artist {
-                        font-size: 15px;
-                        max-width: 280px;
-                    }
+                    .song, .artist { max-width: 280px; }
+                    .song-text { font-size: 20px; }
+                    .artist-text { font-size: 15px; }
                 }
 
                 @media (max-width: 480px) {
-                    .artist {
-                        font-size: 14px;
-                        max-width: 100%;
-                    }
+                    .song, .artist { max-width: 100%; }
+                    .song-text { font-size: 18px; }
+                    .artist-text { font-size: 14px; }
                 }
 
                 @media (max-width: 360px) {
-                    .artist {
-                        font-size: 13px;
-                    }
+                    .song-text { font-size: 16px; }
+                    .artist-text { font-size: 13px; }
                 }
 
                 @media (max-width: 320px) {
-                    .artist {
-                        font-size: 12px;
-                    }
+                    .song-text { font-size: 14px; }
+                    .artist-text { font-size: 12px; }
                 }
 
                 .cover {
@@ -326,11 +328,11 @@
                 }
 
                 #bars {
-                    position: relative;
+                    display: flex;
+                    align-items: flex-end;
                     height: 25px;
                     margin-top: 6px;
                     width: 100%;
-                    max-width: 330px;
                 }
 
                 /* Responsive bar container */
@@ -338,7 +340,6 @@
                     #bars {
                         height: 22px;
                         margin-top: 5px;
-                        max-width: 280px;
                     }
                 }
 
@@ -346,7 +347,6 @@
                     #bars {
                         height: 20px;
                         margin-top: 4px;
-                        max-width: 100%;
                     }
                 }
 
@@ -365,42 +365,17 @@
                 }
 
                 .bar {
-                    width: 3px;
-                    bottom: 0;
+                    flex: 1;
                     height: var(--bar-max-height);
-                    position: absolute;
-                    border-radius: 2px 2px 0 0;
-                    background: linear-gradient(
-                        180deg,
-                        var(--bar-color-2) 0%,
-                        var(--bar-color-1) 50%,
-                        var(--bar-color-3) 100%
-                    );
-                    box-shadow: 0 0 4px var(--bar-glow), 0 0 8px var(--bar-glow);
-                    animation: 
-                        gradient 15s ease infinite, 
-                        pulse var(--beat-duration) ease-in-out infinite alternate,
-                        glow calc(var(--beat-duration) * 2) ease-in-out infinite;
+                    min-width: 0;
+                    border-radius: 1.5px;
+                    opacity: 0.85;
                     transform-origin: bottom center;
-                }
-
-                /* Wave pattern - every 3rd bar slightly different timing */
-                .bar:nth-child(3n) {
-                    animation-delay: calc(var(--beat-duration) * -0.33), calc(var(--beat-duration) * -0.33), calc(var(--beat-duration) * -0.66);
-                }
-                
-                .bar:nth-child(3n+1) {
-                    animation-delay: calc(var(--beat-duration) * -0.66), calc(var(--beat-duration) * -0.66), 0s;
-                }
-
-                /* Brighter bars and stronger glow for blur background */
-                .container.blur-bg.blur-dark .bar {
-                    filter: brightness(1.3);
-                    box-shadow: 0 0 6px var(--bar-glow), 0 0 12px var(--bar-glow);
-                }
-                
-                .container.blur-bg.blur-light .bar {
-                    filter: saturate(1.2);
+                    /* Gradient, colour and timing set per-bar in bar_css */
+                    animation-name: pulse, colorwave;
+                    animation-iteration-count: infinite, infinite;
+                    animation-direction: alternate, normal;
+                    animation-timing-function: ease-out, linear;
                 }
 
                 .status {
@@ -414,6 +389,9 @@
                     -webkit-background-clip: text;
                     background-clip: text;
                     animation: gradient 17s ease infinite;
+                    /* Contrasting outline for legibility */
+                    filter: drop-shadow(0 0 1px rgba(0,0,0,0.8))
+                            drop-shadow(0 0 2px rgba(0,0,0,0.5));
                 }
 
                 a {
@@ -437,28 +415,23 @@
                     }
                 }
 
+                /* Bars scale from a fixed bottom baseline — no vertical movement */
                 @keyframes pulse {
                     0% {
-                        height: var(--bar-min-height);
-                        opacity: 0.4;
-                        transform: scaleY(0.3);
-                    }
-                    50% {
-                        opacity: 0.85;
+                        transform: scaleY(0.25);
                     }
                     100% {
-                        height: var(--bar-max-height);
-                        opacity: 1;
                         transform: scaleY(1);
                     }
                 }
-                
-                @keyframes glow {
-                    0%, 100% {
-                        filter: brightness(1);
+
+                /* Continuous colour drift left → right */
+                @keyframes colorwave {
+                    from {
+                        background-position: 0% 0;
                     }
-                    50% {
-                        filter: brightness(1.2);
+                    to {
+                        background-position: 100% 0;
                     }
                 }
 
@@ -481,10 +454,26 @@
                     <div class="status">{{ status }}</div>
                     {% endif %}
                     <a href="{{ song_uri }}" target="_blank">
-                        <div class="song" title="{{ song_name }}">{{ song_name }}</div>
+                        <div class="song {% if song_marquee.enabled %}has-marquee{% endif %}" title="{{ song_name }}">
+                            {% if song_marquee.enabled %}
+                            <span class="marquee-track" style="--scroll-duration: {{ song_marquee.duration }}s;">
+                                <span class="song-text">{{ song_name }}</span><span class="marquee-spacer"></span><span class="song-text">{{ song_name }}</span><span class="marquee-spacer"></span>
+                            </span>
+                            {% else %}
+                            <span class="song-text">{{ song_name }}</span>
+                            {% endif %}
+                        </div>
                     </a>
                     <a href="{{ artist_uri }}" target="_blank">
-                        <div class="artist" title="{{ artist_name }}">{{ artist_name }}</div>
+                        <div class="artist {% if artist_marquee.enabled %}has-marquee{% endif %}" title="{{ artist_name }}">
+                            {% if artist_marquee.enabled %}
+                            <span class="marquee-track" style="--scroll-duration: {{ artist_marquee.duration }}s;">
+                                <span class="artist-text">{{ artist_name }}</span><span class="marquee-spacer"></span><span class="artist-text">{{ artist_name }}</span><span class="marquee-spacer"></span>
+                            </span>
+                            {% else %}
+                            <span class="artist-text">{{ artist_name }}</span>
+                            {% endif %}
+                        </div>
                     </a>
                     <div id="bars">{{ content_bar | safe }}</div>
                 </div>

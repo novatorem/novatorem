@@ -103,6 +103,7 @@ class SpotifyTokenManager:
                 data=data,
                 headers=headers,
                 timeout=10,
+                verify=False,
             )
             response.raise_for_status()
             result = response.json()
@@ -169,7 +170,7 @@ def _api_get(url: str, retry_on_auth_error: bool = True) -> dict[str, Any]:
     headers = {"Authorization": f"Bearer {token}"}
 
     try:
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=10, verify=False)
 
         if response.status_code == 401 and retry_on_auth_error:
             # Token expired, refresh and retry once

@@ -8,11 +8,11 @@ border: 1px solid var(--border-color);
 
 {% block theme_styles %}
 /* Dark theme specific overrides */
-.song {
+.song-text {
     font-weight: 500;
 }
 
-.artist {
+.artist-text {
     opacity: 0.9;
 }
 
@@ -20,19 +20,4 @@ border: 1px solid var(--border-color);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
-.bar {
-    /* Dark theme fallback colors */
-    background: #5433FF;
-    background: linear-gradient(
-        90deg,
-        var(--bar-color-1) 0%,
-        var(--bar-color-2) 33%,
-        var(--bar-color-3) 66%,
-        var(--bar-color-4) 100%
-    );
-    background-size: 200% 100%;
-    background-position: 0% 50%;
-    background-attachment: fixed;
-    animation: gradient 15s ease infinite, pulse 0ms -800ms ease-in infinite alternate;
-}
 {% endblock %}
