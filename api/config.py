@@ -69,20 +69,13 @@ class SVGConfig:
 
     # Dimensions
     width: int = 480
-    height: int = 133
+    height: int = 135
     album_art_size: int = 100
     border_radius: int = 5
 
     # Equalizer bars
     bar_count: int = 80
-    bar_width: int = 3
-    bar_spacing: int = 4
-    bar_min_height: int = 3
     bar_max_height: int = 15
-
-    # Animation timing (in milliseconds)
-    bar_animation_min: int = 500
-    bar_animation_max: int = 1000
 
     # Default colors (hex without #)
     default_background: str = "181414"
@@ -99,7 +92,6 @@ class SVGConfig:
     # Default audio features (when not available from API)
     default_tempo: float = 120.0  # BPM
     default_energy: float = 0.6
-    default_danceability: float = 0.5
 
     # Default color palettes (RGB tuples)
     default_bar_palette: ColorPalette = field(
