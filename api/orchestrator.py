@@ -19,10 +19,11 @@ from base64 import b64encode
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from colorthief import ColorThief
-from flask import Flask, Response, render_template, request
+from flask import Flask, Response, render_template, request, redirect
 
 from .config import (
     ColorPalette,
+    compact_svg_config,
     svg_config,
     template_config,
     validate_background_type,
@@ -176,12 +177,11 @@ def generate_bar_css(
     bar_palette: Optional[list] = None,
 ) -> str:
     """
-    Generate CSS for the equalizer bars animation, synced to BPM.
+    Generate CSS for the SVG equalizer bars animation, synced to BPM.
 
-    Bars share a wide linear gradient (built from the palette) that
-    animates left-to-right via ``background-position``. Each bar gets
-    a staggered ``animation-delay`` so the colour wave flows spatially
-    across the bar row.
+    Produces a ``@keyframes barcolor`` rule that cycles ``fill`` through
+    the palette, plus per-bar ``.bar:nth-child(N)`` rules that stagger
+    ``animation-delay`` for both the pulse and colour-wave animations.
 
     Args:
         bar_count: Number of equalizer bars to generate
@@ -190,27 +190,18 @@ def generate_bar_css(
         bar_palette: List of RGB tuples for bar colors
 
     Returns:
-        CSS string for shared gradient, glow, and per-bar animation timing
+        CSS string for barcolor keyframe and per-bar animation timing
     """
     css_rules: list[str] = []
     palette = bar_palette or svg_config.default_bar_palette
 
-    # Use the palette directly — repeat the first colour at the end
-    # so the gradient loops seamlessly when the animation wraps.
+    # Build @keyframes barcolor — cycles fill through palette colours
     looped = list(palette) + [palette[0]]
-    stops = ", ".join(f"rgb({r},{g},{b})" for r, g, b in looped)
-
-    # Make the gradient wide enough that each bar's visible slice looks
-    # like a solid colour.  With background-size = bar_count * 100 %,
-    # each bar shows ≈ 1/bar_count of the gradient at any moment.
-    bg_size = bar_count * 100
-
-    css_rules.append(
-        f".bar {{ "
-        f"background: linear-gradient(90deg, {stops}); "
-        f"background-size: {bg_size}% 100%; "
-        f"}}"
-    )
+    stops: list[str] = []
+    for idx, (r, g, b) in enumerate(looped):
+        pct = idx / (len(looped) - 1) * 100
+        stops.append(f"  {pct:.0f}% {{ fill: rgb({r},{g},{b}); }}")
+    css_rules.append("@keyframes barcolor {\n" + "\n".join(stops) + "\n}")
 
     # --- per-bar animation timing ---
     energy_factor = 0.5 + (energy * 0.5)
@@ -224,7 +215,6 @@ def generate_bar_css(
         pulse_delay = int((i / bar_count) * beat_duration_ms * 0.5)
 
         # Colour-wave delay: spread one full cycle across all bars
-        # so adjacent bars show neighbouring slices of the gradient
         wave_delay = int((i - 1) / bar_count * wave_duration_ms)
 
         css_rules.append(
@@ -237,17 +227,73 @@ def generate_bar_css(
     return "\n".join(css_rules)
 
 
-def generate_bar_html(bar_count: int) -> str:
+def generate_bar_svg(
+    bar_count: int,
+    x_start: float,
+    y_bottom: float,
+    area_width: float,
+    bar_height: int,
+    gap: int = 1,
+    bar_palette: Optional[list] = None,
+) -> str:
     """
-    Generate HTML for equalizer bars.
-    
+    Generate SVG ``<rect>`` elements for the equalizer bars.
+
+    Bars are placed as native SVG shapes (not foreignObject HTML) so they
+    are re-rendered as vectors at every display resolution, eliminating
+    scaling artefacts.  ``shape-rendering: crispEdges`` (set in the
+    template CSS) snaps edges to device pixels for uniform appearance.
+
     Args:
-        bar_count: Number of bars to generate
-        
+        bar_count: Number of bars
+        x_start: Left edge of the bar area in SVG user units
+        y_bottom: Bottom edge of the bar area in SVG user units
+        area_width: Total width available for bars in SVG user units
+        bar_height: Height of each bar in SVG user units
+        gap: Gap between bars in SVG user units
+        bar_palette: RGB tuples for initial fill colours
+
     Returns:
-        HTML string containing bar divs
+        SVG markup string containing ``<rect>`` elements
     """
-    return "".join(f"<div class='bar'></div>" for _ in range(bar_count))
+    palette = bar_palette or svg_config.default_bar_palette
+    bar_width = (area_width - (bar_count - 1) * gap) / bar_count
+    stride = bar_width + gap
+    y = y_bottom - bar_height
+
+    paths: list[str] = []
+    
+    # Radius for top corners
+    r = 2.0
+    
+    for i in range(bar_count):
+        x = x_start + i * stride
+        
+        # Clamp radius if bar is too narrow
+        actual_r = min(r, bar_width / 2)
+        
+        # Path for top-rounded bar
+        # Start bottom-left -> go up -> curve top-left -> line top -> curve top-right -> go down -> close
+        d = (
+            f"M {x:.2f},{y + bar_height:.2f} "  # Bottom-left (y is top, so y+height is bottom)
+            f"L {x:.2f},{y + actual_r:.2f} "    # Left vertical up to start of curve
+            f"Q {x:.2f},{y:.2f} {x + actual_r:.2f},{y:.2f} " # Top-left curve
+            f"L {x + bar_width - actual_r:.2f},{y:.2f} "      # Top horizontal
+            f"Q {x + bar_width:.2f},{y:.2f} {x + bar_width:.2f},{y + actual_r:.2f} " # Top-right curve
+            f"L {x + bar_width:.2f},{y + bar_height:.2f} "    # Right vertical down
+            f"Z" # Close
+        )
+
+        color = palette[i % len(palette)]
+        fill = f"rgb({color[0]},{color[1]},{color[2]})"
+        
+        # Use shape-rendering="geometricPrecision" to help with sub-pixel aliasing (clumping)
+        paths.append(
+            f'<path class="bar" d="{d}" '
+            f'fill="{fill}" shape-rendering="geometricPrecision" />'
+        )
+
+    return "\n".join(paths)
 
 
 def get_template_name() -> str:
@@ -284,27 +330,35 @@ def calculate_marquee(text: str, font_size: int, container_width: int = 330) -> 
     """
     Calculate marquee scroll parameters if text overflows its container.
 
-    Uses the standard streaming-app ticker pattern: the text is duplicated
-    and scrolls continuously left.  A brief pause at the start of each
-    cycle lets the viewer read the beginning.
-
-    The scroll distance is computed in pixels (not %) so the animation
-    can use ``margin-left`` — a layout property the browser cannot cull.
+    Uses a simple continuous loop: text is duplicated and scrolls left.
+    The duration is fixed per character to maintain a consistent speed.
 
     Args:
         text: The raw (unescaped) display text
         font_size: CSS font-size in px
-        container_width: Available width in px (matches CSS max-width)
+        container_width: Available width in px
 
     Returns:
-        Dict with 'enabled', and when True: 'duration' (s) and
-        'scroll_px' (px) for one copy + spacer.
+        Dict with 'enabled', and when True: 'duration' (s)
     """
-    estimated_width = len(text) * font_size * 0.55
-    if estimated_width <= container_width:
+    # Estimate width (avg char width ~0.6em)
+    char_width = font_size * 0.6
+    text_width = len(text) * char_width
+    
+    # 50px is the spacer width in base.html.j2
+    spacer_width = 50
+    
+    # Enable marquee if text + spacer overflows
+    if text_width + (spacer_width / 2) <= container_width:
         return {"enabled": False}
-    duration = round(max(6, len(text) * 0.22), 1)
-    return {"enabled": True, "duration": duration}
+        
+    # Constant speed: pixels per second
+    speed_px_per_sec = 25
+    
+    # Distance of one loop is text_width + spacer_width
+    duration = round((text_width + spacer_width) / speed_px_per_sec, 1)
+    
+    return {"enabled": True, "duration": max(5.0, duration)}
 
 
 def make_svg(
@@ -313,34 +367,31 @@ def make_svg(
     border_color: str,
     background_type: str = "color",
     show_status: bool = False,
+    is_compact: bool = False,
 ) -> str:
     """
     Generate SVG widget from normalized track data.
     
     Args:
-        track_data: Normalized track data dict with keys:
-            - is_playing: bool
-            - track_name: str
-            - artist_name: str
-            - album_art_url: str (optional)
-            - track_url: str
-            - artist_url: str
-            - audio_features: dict (optional)
+        track_data: Normalized track data dict
         background_color: Hex color for background (without #)
         border_color: Hex color for border (without #)
         background_type: Type of background ("color", "blur_dark", "blur_light")
         show_status: Whether to show "Vibing to:" / "Recently played:" text
+        is_compact: Whether to use compact mode layout
     
     Returns:
         Rendered SVG template string
     """
-    bar_count = svg_config.bar_count
-    content_bar = generate_bar_html(bar_count)
+    # Select configuration based on mode
+    cfg = compact_svg_config if is_compact else svg_config
+    
+    bar_count = cfg.eq_bar_count
 
     # Get audio features for BPM-synced animation
     audio_features = track_data.get("audio_features") or {}
-    tempo = audio_features.get("tempo", svg_config.default_tempo)
-    energy = audio_features.get("energy", svg_config.default_energy)
+    tempo = audio_features.get("tempo", cfg.default_tempo)
+    energy = audio_features.get("energy", cfg.default_energy)
 
     # Calculate beat duration from BPM
     beat_duration_ms = int(60000 / tempo) if tempo > 0 else 500
@@ -357,6 +408,54 @@ def make_svg(
     # Generate bar CSS with audio features and per-bar colors
     bar_css = generate_bar_css(bar_count, beat_duration_ms, energy, bar_palette)
 
+    # --- SVG bar positioning ---
+    # Compute the bar area rectangle in SVG user-space coordinates.
+    # x: content starts after left-padding + border + album art + gap
+    bar_x_start = (
+        cfg.widget_padding_left
+        + cfg.widget_border_width
+        + cfg.album_art_size
+        + cfg.art_content_gap
+    )
+    bar_x_end = (
+        cfg.width
+        - cfg.widget_padding_right
+        - cfg.widget_border_width
+    )
+    bar_area_width = bar_x_end - bar_x_start
+
+    # y: the .content column (text + bars) is vertically centred in .main
+    # independently of the album art.  Estimate its bottom edge.
+    inner_h = (
+        cfg.height
+        - (cfg.widget_padding_top + cfg.widget_border_width)
+        - (cfg.widget_padding_bottom + cfg.widget_border_width)
+    )
+    content_h = cfg.content_column_height
+    
+    # Align bars to bottom of album art (which is vertically centered)
+    # Album art vertical center is same as container center
+    # So bottom is center + half size
+    center_y = (
+        cfg.widget_padding_top 
+        + cfg.widget_border_width 
+        + inner_h / 2
+    )
+    
+    # If we want bars aligned to bottom of art:
+    bars_y_bottom = center_y + (cfg.album_art_size / 2)
+
+    bar_max_height = int(cfg.eq_bar_max_height + energy * 8)
+    bar_svg = generate_bar_svg(
+        bar_count,
+        bar_x_start,
+        bars_y_bottom,
+        bar_area_width,
+        bar_max_height,
+        gap=cfg.eq_bar_gap,
+        bar_palette=bar_palette,
+    )
+
     # Set status text based on playing state
     is_playing = track_data.get("is_playing", False)
     status = "Vibing to:" if is_playing else "Recently played:"
@@ -364,8 +463,10 @@ def make_svg(
     # Calculate marquee params from raw text (before XML escaping)
     raw_song = track_data.get("track_name", "Unknown Track")
     raw_artist = track_data.get("artist_name", "Unknown Artist")
-    song_marquee = calculate_marquee(raw_song, 22)
-    artist_marquee = calculate_marquee(raw_artist, 16)
+    
+    # Calculate marquee with font size from config
+    song_marquee = calculate_marquee(raw_song, cfg.song_font_size, container_width=bar_area_width)
+    artist_marquee = calculate_marquee(raw_artist, cfg.artist_font_size, container_width=bar_area_width)
 
     # Escape text for XML
     artist_name = escape_xml(raw_artist)
@@ -376,8 +477,8 @@ def make_svg(
     blur_is_dark = background_type == "blur_dark"
 
     template_data = {
-        # Bar animation
-        "content_bar": content_bar,
+        # Bar animation (SVG rects + CSS)
+        "bar_svg": bar_svg,
         "bar_css": bar_css,
         # Audio features for template
         "beat_duration_ms": beat_duration_ms,
@@ -397,18 +498,30 @@ def make_svg(
         "background_type": background_type,
         "use_blur_background": use_blur_background,
         "blur_is_dark": blur_is_dark,
-        "blur_amount": svg_config.blur_amount,
+        "blur_amount": cfg.blur_amount,
         "blur_overlay_opacity": (
-            svg_config.blur_dark_opacity if blur_is_dark else svg_config.blur_light_opacity
+            cfg.blur_dark_opacity if blur_is_dark else cfg.blur_light_opacity
         ),
         # Status
         "status": status,
         "show_status": show_status,
-        # Dimensions
-        "width": svg_config.width,
-        "height": svg_config.height,
-        "album_size": svg_config.album_art_size,
-        "border_radius": svg_config.border_radius,
+        # Dimensions & layout (single source of truth from config)
+        "width": cfg.width,
+        "height": cfg.height,
+        "album_size": cfg.album_art_size,
+        "border_radius": cfg.border_radius,
+        "widget_padding_top": cfg.widget_padding_top,
+        "widget_padding_right": cfg.widget_padding_right,
+        "widget_padding_bottom": cfg.widget_padding_bottom,
+        "widget_padding_left": cfg.widget_padding_left,
+        "widget_border_width": cfg.widget_border_width,
+        "art_content_gap": cfg.art_content_gap,
+        "eq_spacer_height": cfg.eq_spacer_height,
+        "eq_spacer_margin_top": cfg.eq_spacer_margin_top,
+        "artist_margin_top": cfg.artist_margin_top,
+        # Font sizes
+        "song_font_size": cfg.song_font_size,
+        "artist_font_size": cfg.artist_font_size,
         # Marquee
         "song_marquee": song_marquee,
         "artist_marquee": artist_marquee,
@@ -496,6 +609,7 @@ def catch_all(path: str) -> Response:
 
     # Optional parameters
     show_status = request.args.get("show_status", "").lower() in ("true", "1", "yes")
+    is_compact = request.args.get("compact", "").lower() in ("true", "1", "yes")
 
     try:
         service_name, service = get_active_service()
@@ -509,12 +623,49 @@ def catch_all(path: str) -> Response:
     except Exception as e:
         return make_error_svg(f"Error: {str(e)}", 500)
 
-    svg = make_svg(track_data, background_color, border_color, background_type, show_status)
+    svg = make_svg(track_data, background_color, border_color, background_type, show_status, is_compact)
 
     resp = Response(svg, mimetype="image/svg+xml")
     resp.headers["Cache-Control"] = "s-maxage=1"
 
     return resp
+
+
+@app.route("/preview")
+def preview_page() -> Response:
+    """Serve the preview page for local development."""
+    candidates = [
+        os.path.join(os.getcwd(), "preview.html"),
+        os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "preview.html",
+        ),
+    ]
+    for path in candidates:
+        if os.path.isfile(path):
+            with open(path, "r", encoding="utf-8") as f:
+                return Response(f.read(), mimetype="text/html")
+    return Response("preview.html not found", status=404, mimetype="text/plain")
+
+
+@app.route("/redirect")
+def redirect_to_song() -> Response:
+    """Redirect to the currently playing song."""
+    # Default fallback URL (e.g., project repository)
+    fallback_url = "https://github.com/novatorem/novatorem"
+
+    try:
+        service_name, service = get_active_service()
+        track_data = service.get_now_playing()
+        track_url = track_data.get("track_url")
+        
+        if track_url:
+            return redirect(track_url)
+    except Exception:
+        # In case of any error (service not configured, API error), use fallback
+        pass
+
+    return redirect(fallback_url)
 
 
 @app.route("/health")

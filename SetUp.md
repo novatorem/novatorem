@@ -6,14 +6,20 @@ This project supports two music services: **Spotify** and **Last.fm**. You only 
 - If only **Spotify** is configured, Spotify will be used.
 - If only **Last.fm** is configured, Last.fm will be used.
 
-## Quick Start
+## Quick Start (Local Development)
 
-1. Copy `.env.example` to `.env`:
+1. Copy `.env.example` to `.env` and fill in your credentials for at least one service (see below):
    ```bash
    cp .env.example .env
    ```
-2. Fill in the environment variables for your chosen service (see below)
-3. Deploy or run locally
+2. Run:
+   ```bash
+   python start.py
+   ```
+
+That's it. The launcher will create a virtual environment, install all dependencies, start the Flask server, and open a live preview in your browser at `http://127.0.0.1:5000/preview`.
+
+Press **Ctrl+C** to stop the server. Pass `--no-open` to skip opening the browser.
 
 ---
 
@@ -137,32 +143,15 @@ You'll need these two environment variables:
   - To start the Flask server execute `heroku ps:scale web=1` once the build is completed.
 - Or click the `Deploy to Heroku` button above to automatically start the deployment process.
 
-### Run locally with Docker
+### Run locally with Docker (alternative)
 
-- You need to have [Docker](https://docs.docker.com/get-docker/) installed.
+If you prefer Docker over the `python start.py` launcher:
 
-- Add Environment Variables (choose one service):
+```bash
+docker compose up
+```
 
-  **For Spotify:**
-  - `SPOTIFY_REFRESH_TOKEN`
-  - `SPOTIFY_CLIENT_ID`
-  - `SPOTIFY_SECRET_ID`
-  
-  **For Last.fm:**
-  - `LAST_FM_API_KEY`
-  - `LAST_FM_USERNAME`
-
-- To run the service, open a terminal in the root folder of the repo: <br>
-  Execute:
-  ```
-  docker compose up
-  ```
-- When finished, navigate to [http://localhost:5000/](http://localhost:5000/)
-- To stop the service, open a terminal in the root folder of the repo: <br>
-  Execute:
-  ```
-  docker compose down
-  ```
+Then open [http://localhost:5000/preview](http://localhost:5000/preview). Stop with `docker compose down`.
 
 ## ReadMe
 

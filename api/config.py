@@ -68,14 +68,39 @@ class SVGConfig:
     """SVG widget configuration and defaults."""
 
     # Dimensions
-    width: int = 480
+    width: int = 540
     height: int = 135
-    album_art_size: int = 100
+    album_art_size: int = 121
     border_radius: int = 5
 
-    # Equalizer bars
-    bar_count: int = 80
-    bar_max_height: int = 15
+    # Widget container layout (injected into CSS via template variables)
+    widget_padding_top: int = 7
+    widget_padding_right: int = 8
+    widget_padding_bottom: int = 7
+    widget_padding_left: int = 7
+    widget_border_width: int = 1
+    art_content_gap: int = 7       # gap between album art and text/bars column
+
+    # Equalizer bar area (spacer div that reserves space for SVG bar overlay)
+    eq_spacer_height: int = 45
+    eq_spacer_margin_top: int = 15
+
+    # Spacing between song and artist
+    artist_margin_top: int = 4
+
+    # Equalizer bars (SVG rects)
+    eq_bar_count: int = 80
+    eq_bar_max_height: int = 45
+    eq_bar_gap: int = 1
+
+    # Estimated height of the content column (song + artist + eq spacer)
+    # used to vertically centre the SVG bar rects.
+    # song ~26 + artist_margin 4 + artist ~19 + eq_spacer_margin 6 + eq_spacer 25 = 80
+    content_column_height: int = 95
+
+    # Font sizes
+    song_font_size: int = 22
+    artist_font_size: int = 16
 
     # Default colors (hex without #)
     default_background: str = "181414"
@@ -94,6 +119,75 @@ class SVGConfig:
     default_energy: float = 0.6
 
     # Default color palettes (RGB tuples)
+    default_bar_palette: ColorPalette = field(
+        default_factory=lambda: [
+            (75, 75, 75),
+            (100, 100, 100),
+            (125, 125, 125),
+            (150, 150, 150),
+        ]
+    )
+    default_song_palette: ColorPalette = field(
+        default_factory=lambda: [
+            (200, 200, 200),
+            (150, 150, 150),
+        ]
+    )
+
+
+@dataclass(frozen=True)
+class CompactSVGConfig:
+    """Configuration for compact widget mode."""
+
+    # Dimensions
+    width: int = 400
+    height: int = 80
+    album_art_size: int = 64
+    border_radius: int = 5
+
+    # Widget container layout
+    widget_padding_top: int = 5
+    widget_padding_right: int = 5
+    widget_padding_bottom: int = 5
+    widget_padding_left: int = 5
+    widget_border_width: int = 1
+    art_content_gap: int = 10
+
+    # Equalizer bar area
+    eq_spacer_height: int = 14
+    eq_spacer_margin_top: int = 5
+
+    # Spacing between song and artist
+    artist_margin_top: int = -3
+
+    # Equalizer bars
+    eq_bar_count: int = 50
+    eq_bar_max_height: int = 14
+    eq_bar_gap: int = 1
+
+    # Content column height (centering)
+    # song ~19 + artist ~15 + margin 5 + spacer 14 = ~53
+    content_column_height: int = 54
+
+    # Font sizes
+    song_font_size: int = 16
+    artist_font_size: int = 13
+
+    # Default colors (same as standard)
+    default_background: str = "181414"
+    default_border: str = "181414"
+    default_background_type: str = "color"
+
+    # Blur settings
+    blur_amount: int = 10
+    blur_dark_opacity: float = 0.7
+    blur_light_opacity: float = 0.5
+
+    # Audio features
+    default_tempo: float = 120.0
+    default_energy: float = 0.6
+
+    # Palettes (same defaults)
     default_bar_palette: ColorPalette = field(
         default_factory=lambda: [
             (75, 75, 75),
@@ -190,4 +284,5 @@ def validate_background_type(bg_type: str, default: str) -> str:
 spotify_config = SpotifyConfig()
 lastfm_config = LastFmConfig()
 svg_config = SVGConfig()
+compact_svg_config = CompactSVGConfig()
 template_config = TemplateConfig()
