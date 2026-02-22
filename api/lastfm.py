@@ -42,9 +42,9 @@ DEFAULT_AUDIO_FEATURES = {
 }
 
 
-def _try_get_spotify_audio_features(artist_name: str, track_name: str) -> Optional[dict[str, Any]]:
+def _get_spotify_data(artist_name: str, track_name: str) -> tuple[Optional[dict[str, Any]], str]:
     """
-    Try to get audio features from Spotify by searching for the track.
+    Try to get audio features and Spotify URL by searching for the track.
     Only works if Spotify is also configured.
     
     Args:
@@ -52,16 +52,20 @@ def _try_get_spotify_audio_features(artist_name: str, track_name: str) -> Option
         track_name: Name of the track
         
     Returns:
-        Audio features dict if found, None otherwise
+        Tuple of (audio_features_dict, spotify_track_url)
     """
     try:
         # Import here to avoid circular imports
         from . import spotify
         
         if not spotify.is_configured():
-            return None
+            return None, ""
         
-        # Search for the track on Spotify
+        # Construct fallback search URL for user redirection
+        user_query = f"{artist_name} {track_name}"
+        fallback_url = f"https://open.spotify.com/search/{requests.utils.quote(user_query)}"
+
+        # Search for the track on Spotify API
         query = f"artist:{artist_name} track:{track_name}"
         search_url = f"https://api.spotify.com/v1/search?q={requests.utils.quote(query)}&type=track&limit=1"
         
@@ -70,24 +74,31 @@ def _try_get_spotify_audio_features(artist_name: str, track_name: str) -> Option
             tracks = data.get("tracks", {}).get("items", [])
             
             if not tracks:
-                return None
+                # Track not found via API, return search URL as fallback
+                return None, fallback_url
             
-            track_id = tracks[0].get("id", "")
+            track = tracks[0]
+            track_id = track.get("id", "")
+            track_url = track.get("external_urls", {}).get("spotify", "")
+            
             if not track_id:
-                return None
+                # Track found but no ID (unlikely), use URL or fallback
+                return None, track_url or fallback_url
             
             # Get audio features
             audio_features = spotify.get_audio_features(track_id)
-            if audio_features:
-                return audio_features.to_dict()
+            features_dict = audio_features.to_dict() if audio_features else None
+            
+            return features_dict, track_url
             
         except Exception:
-            pass
+            # API failure, return search URL as fallback to keep user in Spotify
+            return None, fallback_url
             
-        return None
-        
     except ImportError:
-        return None
+        pass
+        
+    return None, ""
 
 
 def is_configured() -> bool:
@@ -378,14 +389,17 @@ def get_now_playing() -> dict[str, Any]:
     track = tracks[0]
     track_info = _extract_track_info(track)
 
-    # Try to get audio features from Spotify, fall back to defaults
-    audio_features = _try_get_spotify_audio_features(
+    # Try to get audio features and Spotify URL
+    audio_features, spotify_url = _get_spotify_data(
         track_info.artist_name, 
         track_info.track_name
     )
     
     if audio_features is None:
         audio_features = DEFAULT_AUDIO_FEATURES.copy()
+
+    # Prefer Spotify URL for redirect if available (more reliable playback)
+    final_track_url = spotify_url if spotify_url else track_info.track_url
 
     # Return as dictionary for compatibility with existing code
     return {
@@ -394,7 +408,7 @@ def get_now_playing() -> dict[str, Any]:
         "artist_name": track_info.artist_name,
         "album_name": track_info.album_name,
         "album_art_url": track_info.album_art_url,
-        "track_url": track_info.track_url,
+        "track_url": final_track_url,
         "artist_url": track_info.artist_url,
         "audio_features": audio_features,
     }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,35 +13,60 @@
       padding: 2rem;
       margin: 0;
     }
-    h1 { font-size: 1.25rem; margin-bottom: 0.5rem; }
-    p { color: #888; margin: 0 0 1rem; }
+
+    h1 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: #888;
+      margin: 0 0 1rem;
+    }
+
     .widget-wrap {
       margin-bottom: 2rem;
       padding: 1rem;
       background: #252525;
       border-radius: 8px;
     }
-    .widget-wrap img { display: block; border-radius: 5px; }
-    a { color: #58a6ff; }
+
+    .widget-wrap img {
+      display: block;
+      border-radius: 5px;
+    }
+
+    a {
+      color: #58a6ff;
+    }
   </style>
 </head>
+
 <body>
   <h1>Novatorem – Now Playing Widget Preview</h1>
-  <p>Make sure the app is running: <code>python -m api.orchestrator</code> from this folder, then open <a href="http://127.0.0.1:5000/">http://127.0.0.1:5000/</a></p>
+  <p>Quick start: <code>python start.py</code> or <code>npm start</code> &mdash; see <a href="/">raw SVG endpoint</a>
+  </p>
 
   <div class="widget-wrap">
     <strong>Default</strong>
-    <img src="http://127.0.0.1:5000/" alt="Now Playing (default)" width="480" height="133" />
+    <a href="/redirect"><img src="/" alt="Now Playing (default)" width="540" height="135" /></a>
   </div>
 
   <div class="widget-wrap">
-    <strong>Blur dark + white border (README style)</strong>
-    <img src="http://127.0.0.1:5000/?background_type=blur_dark&border_color=ffffff" alt="Now Playing" width="480" height="133" />
+    <strong>Blur dark + white border</strong>
+    <a href="/redirect"><img src="/?background_type=blur_dark&border_color=ffffff" alt="Now Playing" width="540"
+        height="135" /></a>
   </div>
 
   <div class="widget-wrap">
     <strong>Custom</strong>
-    <img src="http://127.0.0.1:5000/?background_type=blur_light&border_color=000000" alt="Custom" width="480" height="133" />
+    <a href="/redirect"><img src="/?background_type=blur_light&border_color=000000" alt="Custom" /></a>
+  </div>
+  <div class="widget-wrap">
+    <strong>Compact Mode</strong>
+    <a href="/redirect?compact=true"><img src="/?compact=true&background_type=blur_dark&border_color=ffffff"
+        alt="Compact Mode" width="400" height="80" /></a>
   </div>
 </body>
+
 </html>
